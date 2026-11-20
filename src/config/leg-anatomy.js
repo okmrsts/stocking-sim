@@ -32,53 +32,6 @@ export const bodyProfile = [
   [1.017,-0.025,0.843,-0.030,0.034,0.038,0.00]
 ];
 
-export const footAnatomy = {
-  // Z station, X center, half-width, sole height, dorsal height.
-  sections: [
-    [-0.056, 0.000, 0.002, 0.018, 0.030],
-    [-0.053, 0.000, 0.018, 0.009, 0.045],
-    [-0.043,-0.002, 0.026, 0.003, 0.061],
-    [-0.028,-0.003, 0.028, 0.002, 0.084],
-    [-0.010,-0.005, 0.030, 0.002, 0.093],
-    [ 0.015,-0.006, 0.031, 0.003, 0.084],
-    [ 0.044,-0.006, 0.032, 0.004, 0.068],
-    [ 0.073,-0.005, 0.037, 0.004, 0.056],
-    [ 0.101,-0.002, 0.043, 0.003, 0.044],
-    [ 0.127,-0.001, 0.046, 0.003, 0.035],
-    [ 0.146,-0.004, 0.040, 0.004, 0.030],
-    [ 0.153,-0.010, 0.029, 0.006, 0.023],
-    [ 0.159,-0.015, 0.004, 0.013, 0.016]
-  ],
-  // Toe center X/Y/Z, lateral/vertical/longitudinal radii, outward splay.
-  toes: [
-    [-0.032,0.0160,0.153,0.0132,0.0140,0.0248,-0.07],
-    [-0.008,0.0145,0.152,0.0097,0.0115,0.0235,-0.01],
-    [ 0.010,0.0133,0.147,0.0086,0.0105,0.0210, 0.04],
-    [ 0.026,0.0120,0.141,0.0077,0.0095,0.0175, 0.12],
-    [ 0.039,0.0110,0.132,0.0071,0.0085,0.0143, 0.21]
-  ],
-  // Height, X/Z center and radii at the Achilles-to-ankle transition.
-  ankleBase: [
-    [0.018,-0.004,-0.025,0.017,0.016],
-    [0.039,-0.004,-0.024,0.023,0.025],
-    [0.058,-0.003,-0.022,0.024,0.027],
-    [0.075,-0.002,-0.017,0.026,0.028],
-    [0.092,-0.001,-0.015,0.029,0.031]
-  ],
-  // Lateral and medial malleoli: center X/Y/Z, then radii.
-  malleoli: [
-    [0.023,0.064,-0.019,0.0095,0.0120,0.0110],
-    [-0.028,0.077,-0.011,0.0100,0.0110,0.0120]
-  ],
-  // Contact allowances are smaller than the tissue details between the toes.
-  contact: {
-    forefootStartZM: 0.095, forefootBlendM: 0.032,
-    toeTipExtraM: 0.0011, toeCapBlendM: 0.028, toeClearanceM: 0.00185, toeBridgeM: 0.0018,
-    footClearanceM: 0.00120, samplePitchM: 0.0009
-  },
-  skinJoinM: 0.310, skinGridM: 0.0026
-};
-
 export const lowerBodyConfig = Object.freeze({
   halfStanceM: 0.090,
   joinArc: 0.775,

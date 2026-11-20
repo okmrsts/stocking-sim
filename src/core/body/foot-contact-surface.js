@@ -9,17 +9,19 @@ const smooth = value => {
 const mix = (a, b, t) => a + (b - a) * t;
 const mixPoint = (a, b, t) => a.map((value, axis) => mix(value, b[axis], t));
 
-export function withFootEnvelope(leg, foot, { skinJoinM: joinArc, sections, toes, contact }) {
+export function withFootEnvelope(leg, foot, { skinJoinM: joinArc, bounds, contact }) {
   const rows = 132, columns = 128;
   const fitted = [];
-  const tipZ = Math.max(sections.at(-1)[0], ...toes.map(toe => toe[2] + toe[5]));
-  const width = Math.max(...sections.map(s => Math.abs(s[1]) + s[2]),
-    ...toes.map(t => Math.abs(t[0]) + t[3] + Math.abs(t[6]) * t[5])) + 2 * contact.samplePitchM;
-  const height = Math.max(...sections.map(s => s[4]), ...toes.map(t => t[1] + t[4])) + 2 * contact.samplePitchM;
+  const { tipZ } = foot;
+  const width = Math.max(-bounds.lower[0], bounds.upper[0]);
+  const height = contact.forefootSamplingHeightM;
   const frontReduction = leg.section(0).z - tipZ - contact.toeTipExtraM;
   const insetZ = tipZ - contact.samplePitchM;
   // Span small changes between adjacent toe tips before triangulating the cloth.
-  const toeField = (x, y, z) => Math.min(foot.sample(x, y, z), foot.sample(x, y, z - contact.toeBridgeM));
+  const toeField = (x, y, z) => {
+    const field = foot.sample(x, y, z);
+    return field <= 0 ? field : Math.min(field, foot.sample(x, y, z - contact.toeBridgeM));
+  };
   for (let row = 0; row <= rows; row++) {
     const arc = joinArc * row / rows;
     const { x, y, z } = leg.section(arc);
@@ -34,7 +36,10 @@ export function withFootEnvelope(leg, foot, { skinJoinM: joinArc, sections, toes
       const angle = period * col / columns;
       let toe;
       if (toeSlice) {
-        const dx = Math.sin(angle), dy = Math.cos(angle);
+        // Distribute columns over the broad, shallow forefoot instead of clustering at its sides.
+        const xDirection = Math.sin(angle) * toeSlice.aspect, yDirection = Math.cos(angle);
+        const directionLength = Math.hypot(xDirection, yDirection);
+        const dx = xDirection / directionLength, dy = yDirection / directionLength;
         const taper = 1 - 0.58 * smooth((zFit - insetZ) / (tipZ + contact.toeTipExtraM - insetZ));
         const radius = taper * toeSlice.radius(dx, dy) + contact.toeClearanceM;
         toe = [toeSlice.center[0] + dx * radius, toeSlice.center[1] + dy * radius, zFit];
@@ -50,7 +55,13 @@ export function withFootEnvelope(leg, foot, { skinJoinM: joinArc, sections, toes
       const direction = delta.map(value => value / radius);
       const ray = gap => center.map((coordinate, axis) => coordinate + gap * direction[axis]);
       const skinRadius = outerSkinRadius(foot.sample, ray) ?? radius * 0.8;
-      const footPoint = ray(mix(radius, skinRadius + contact.footClearanceM, footWeight));
+      const transitionClearance = 4 * toeWeight * (1 - toeWeight) * contact.blendClearanceM;
+      const footPoint = ray(mix(radius, skinRadius + contact.footClearanceM, footWeight) + transitionClearance);
+      if (toe) {
+        // Preserve the clearance at the transition between the tilted and axial cuts.
+        const outward = normalize([toe[0] - toeSlice.center[0], toe[1] - toeSlice.center[1], 0]);
+        toe = toe.map((value, axis) => value + transitionClearance * outward[axis]);
+      }
       fitted.push(toe ? mixPoint(footPoint, toe, toeWeight) : footPoint);
     }
   }

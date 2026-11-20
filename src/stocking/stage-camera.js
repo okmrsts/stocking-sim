@@ -23,7 +23,7 @@ export function createStageCamera(views, resolveAnchor) {
     const { positionM, targetM } = view.anchor ? resolveAnchor(view.anchor) : view;
     camera.position.fromArray(positionM);
     target.fromArray(targetM);
-    camera.near = view.nearM;
+    camera.near = view.presetClipNearM ?? view.nearM;
     camera.far = view.farM;
     camera.lookAt(target);
     setAspect(camera.aspect);
@@ -31,6 +31,7 @@ export function createStageCamera(views, resolveAnchor) {
   }
 
   function rotate(dx, dy) {
+    releasePresetClip();
     orbit.setFromVector3(camera.position.clone().sub(target));
     orbit.theta -= dx * 0.006;
     orbit.phi = Math.max(0.26, Math.min(2.84, orbit.phi - dy * 0.006));
@@ -39,11 +40,18 @@ export function createStageCamera(views, resolveAnchor) {
   }
 
   function zoom(factor) {
+    releasePresetClip();
     const offset = camera.position.clone().sub(target);
     const distance = offset.length();
     const next = Math.max(camera.near * 3, Math.min(camera.far * 0.60, distance * factor));
     camera.position.copy(target).addScaledVector(offset, next / distance);
     camera.lookAt(target);
+  }
+
+  function releasePresetClip() {
+    if (!view || camera.near === view.nearM) return;
+    camera.near = view.nearM;
+    camera.updateProjectionMatrix();
   }
 
   return { camera, target, setView, setAspect, rotate, zoom, zoomRatio: () => camera.position.distanceTo(target) / referenceDistance };

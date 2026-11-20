@@ -2,6 +2,7 @@ import { createSweptSurface } from './swept-surface.js';
 import { createFootField } from './foot-field.js';
 import { createImplicitMesh } from './implicit-mesh.js';
 import { withFootEnvelope } from './foot-contact-surface.js';
+import { createFootNails } from './foot-nails.js';
 
 const gaussian = (value, center, width) => Math.exp(-Math.pow((value - center) / width, 2));
 
@@ -25,8 +26,9 @@ export function createLeg(profile, anatomy) {
     skinSurface,
     footDistance: foot.sample,
     footLimitM: foot.limit,
+    createFootNails: () => createFootNails(anatomy.toes, foot.sample),
     createFootGeometry: () => createImplicitMesh(
-      foot.sample, [-0.061, -0.004, -0.063], [0.061, foot.limit, 0.185], anatomy.skinGridM
+      foot.sample, anatomy.bounds.lower, [anatomy.bounds.upper[0], foot.limit, anatomy.bounds.upper[1]], anatomy.skinGridM
     )
   };
 }

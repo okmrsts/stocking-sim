@@ -10,17 +10,24 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
   scene.background = new Color(config.background);
 
   const skin = new MeshStandardMaterial({ color: config.skin, roughness: 0.74, metalness: 0.0 });
+  const nailMaterial = new MeshStandardMaterial({ color: config.nail, roughness: 0.40 });
   const map = new MeshBasicMaterial({ vertexColors: true, toneMapped: false });
   const torso = new Mesh(body.loaded, skin);
   scene.add(torso);
+  const nails = new Group();
   const textile = new Group();
   for (const side of [1, -1]) {
+    const nail = new Mesh(body.nails, nailMaterial);
+    nail.position.x = side * body.halfStanceM;
+    nail.scale.x = side;
+    nails.add(nail);
     const stocking = new Mesh(clothGeometry, clothMaterial);
     stocking.position.x = side * body.halfStanceM;
     stocking.scale.x = side;
     stocking.renderOrder = 2;
     textile.add(stocking);
   }
+  scene.add(nails);
   scene.add(textile);
   const unloaded = new Mesh(unloadedGeometry, clothMaterial);
   unloaded.renderOrder = 2;
@@ -53,10 +60,14 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
   return {
     scene, textile, unloaded,
     setSkinLoaded: loaded => { torso.geometry = loaded ? body.loaded : body.bare; },
-    setBody: next => { body = next; },
+    setBody: next => {
+      body = next;
+      for (const nail of nails.children) nail.geometry = body.nails;
+    },
     setTissueMap: enabled => {
       if (enabled) addTissueColors(body.bare, body.tissueMap, tissueDisplay);
       torso.material = enabled ? map : skin;
+      nails.visible = !enabled;
     },
     setClothGeometry: geometry => {
       for (const stocking of textile.children) stocking.geometry = geometry;

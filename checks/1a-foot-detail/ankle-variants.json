@@ -1,0 +1,40 @@
+[
+  {
+    "ankles": 90,
+    "footFit": {
+      "clothWidthMm": 96.6486930847168,
+      "skinWidthMm": 92.46287494897842,
+      "tipOverhangMm": 1.630634069442749,
+      "triangleCenters": {
+        "samples": 16320,
+        "insideSkin": 0,
+        "minFieldMm": 0.45116005640624546,
+        "closestPointM": [
+          0.030532782276471455,
+          0.1355974624554316,
+          -0.009211231954395771
+        ]
+      }
+    },
+    "validationErrors": 0
+  },
+  {
+    "ankles": 110,
+    "footFit": {
+      "clothWidthMm": 96.6486930847168,
+      "skinWidthMm": 92.46287494897842,
+      "tipOverhangMm": 1.630634069442749,
+      "triangleCenters": {
+        "samples": 16320,
+        "insideSkin": 0,
+        "minFieldMm": 0.44046912306239133,
+        "closestPointM": [
+          0.03501022979617119,
+          0.13555143276850382,
+          -0.0021763744249862307
+        ]
+      }
+    },
+    "validationErrors": 0
+  }
+]

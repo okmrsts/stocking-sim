@@ -1,4 +1,4 @@
-import { footAnatomy } from '../config/leg-anatomy.js';
+import { footAnatomy } from '../config/foot-anatomy.js';
 import { material, meshLevels, preset, tissue } from '../config/stage1a.js';
 import { createLeg } from '../core/body/leg-model.js';
 import { createLowerBodyGeometry } from '../core/body/lower-body.js';
@@ -37,7 +37,7 @@ export async function buildFitting(values, solve, repeats) {
   const foot = leg.createFootGeometry();
   const skinStart = footAnatomy.skinJoinM;
   const body = {
-    foot, halfStanceM: pelvis.halfStanceM, tissueMap,
+    foot, nails: leg.createFootNails(), halfStanceM: pelvis.halfStanceM, tissueMap,
     bare: createLowerBodyGeometry(leg.skinSurface, foot, skinStart, pelvis),
     loaded: createLowerBodyGeometry(wrapCompliantSurface(leg.skinSurface, tissueField), foot, skinStart, pelvis)
   };
@@ -49,4 +49,5 @@ export function disposeFitting({ geometry, body }) {
   body.bare.dispose();
   body.loaded.dispose();
   body.foot.dispose();
+  body.nails.dispose();
 }

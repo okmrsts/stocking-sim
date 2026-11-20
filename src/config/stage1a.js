@@ -36,6 +36,6 @@ export const tissue = Object.freeze({
 export const comparisonConfig = Object.freeze({ heightM: 1.24, minHeightM: 1.11, minWidthM: 0.86, cameraDistanceM: 2.4 });
 
 export const renderConfig = Object.freeze({
-  maxPixelRatio: 1.6, background: 0xe5dfd9, skin: 0xf1c7b2,
+  maxPixelRatio: 1.6, background: 0xe5dfd9, skin: 0xf1c7b2, nail: 0xe6aea2,
   warmLight: 0xffefda, coolLight: 0xf5f0ff
 });

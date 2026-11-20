@@ -159,6 +159,79 @@
       "nearM": 0.006,
       "farM": 5
     },
+    "foot-top": {
+      "label": "甲と五本の指",
+      "group": "foot",
+      "positionM": [
+        0.105,
+        0.318,
+        0.115
+      ],
+      "targetM": [
+        0.09,
+        0.012,
+        0.062
+      ],
+      "fovDeg": 50,
+      "minHorizontalFovDeg": 34,
+      "nearM": 0.006,
+      "farM": 5
+    },
+    "foot-medial": {
+      "label": "内側と土踏まず",
+      "group": "foot",
+      "positionM": [
+        -0.184,
+        0.064,
+        0.157
+      ],
+      "targetM": [
+        0.087,
+        0.045,
+        0.06
+      ],
+      "fovDeg": 48,
+      "minHorizontalFovDeg": 37,
+      "nearM": 0.006,
+      "presetClipNearM": 0.189,
+      "farM": 5
+    },
+    "foot-lateral": {
+      "label": "外くるぶし",
+      "group": "foot",
+      "positionM": [
+        0.365,
+        0.1,
+        0.095
+      ],
+      "targetM": [
+        0.091,
+        0.062,
+        0.03
+      ],
+      "fovDeg": 49,
+      "minHorizontalFovDeg": 35,
+      "nearM": 0.006,
+      "farM": 5
+    },
+    "foot-ankle": {
+      "label": "足首の後ろ",
+      "group": "foot",
+      "positionM": [
+        0.13,
+        0.123,
+        -0.258
+      ],
+      "targetM": [
+        0.091,
+        0.075,
+        -0.018
+      ],
+      "fovDeg": 43,
+      "minHorizontalFovDeg": 36,
+      "nearM": 0.006,
+      "farM": 5
+    },
     "cuff": {
       "label": "履き口",
       "group": "wrinkles",

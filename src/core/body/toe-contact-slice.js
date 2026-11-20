@@ -24,6 +24,10 @@ export function createToeContactSlice(sample, z, pitch, width, height) {
     momentY += (a[1] + b[1]) * area;
   }
   const center = [momentX / (3 * twiceArea), momentY / (3 * twiceArea)];
+  const [breadth, depth] = [0, 1].map(axis => {
+    const values = hull.map(point => point[axis]);
+    return Math.max(...values) - Math.min(...values);
+  });
 
   function boundary(x, inside, outside) {
     for (let iteration = 0; iteration < 7; iteration++) {
@@ -47,5 +51,5 @@ export function createToeContactSlice(sample, z, pitch, width, height) {
     return edgeDistance;
   }
 
-  return { center, radius };
+  return { center, radius, aspect: breadth / depth };
 }
