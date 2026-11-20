@@ -25,13 +25,13 @@ export function wrapCompliantSurface(surface, field) {
 
 export function updateTissueField(frame, config, previous) {
   const { columns, rows, arcs, state } = frame;
-  const { compliance, spreadM, angularSpreadRad, recoverySpreadM, shoulderReturn, relaxation } = config;
+  const { compliance, spreadM, angularSpreadRad, relaxation } = config;
   const step = arcs[1] - arcs[0];
-  const extraRows = Math.ceil(3 * recoverySpreadM / step);
+  const extraRows = Math.ceil(3 * spreadM / step);
   const count = rows + extraRows + 1;
   const depths = new Float32Array(count * columns);
   const angular = kernel(angularSpreadRad / (tau / columns));
-  const short = kernel(spreadM / step), long = kernel(recoverySpreadM / step);
+  const axial = kernel(spreadM / step);
   const startArcM = compliance[0][0];
 
   for (let row = 0; row <= rows; row++) {
@@ -58,10 +58,10 @@ export function updateTissueField(frame, config, previous) {
     const gate = Math.max(0, Math.min(1, (arc - startArcM) / config.startFadeM));
     for (let col = 0; col < columns; col++) {
       const angle = col * tau / columns;
-      const local = along(row, col, short);
-      const shoulder = Math.max(0, along(row, col, long) - local) * shoulderReturn;
+      // Spread the inward response across the edge of an applied load.
+      const depth = along(row, col, axial);
       values[row * columns + col] = mix(previous?.sample(arc, angle) ?? 0,
-        gate * gate * (3 - 2 * gate) * (local - shoulder), relaxation);
+        gate * gate * (3 - 2 * gate) * depth, relaxation);
     }
   }
 

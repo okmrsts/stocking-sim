@@ -9,7 +9,7 @@ export const preset = Object.freeze({
     { arcM: 0.320, widthM: 0.035, lengthRatioDelta: 0.060 },
     { arcM: 0.621, widthM: 0.035, lengthRatioDelta: -0.025 }
   ],
-  cuffStiffness: 1.55, cuffYarnCount: 2.15, toeYarnCount: 1.95,
+  cuffStiffness: 1.30, cuffYarnCount: 2.15, toeYarnCount: 1.95,
   cellPitchM: [0.00047, 0.00045], dyeLinear: [0.026, 0.025, 0.036]
 });
 
@@ -34,11 +34,11 @@ export const tissue = Object.freeze({
     [0.368, 0.00022, 0.0013],
     [0.494, 0.00046, 0.0032],
     [0.615, 0.00023, 0.0018],
-    [0.756, 0.00108, 0.0075],
-    [0.835, 0.00175, 0.0100]
+    [0.756, 0.00065, 0.0035],
+    [0.835, 0.00065, 0.0035]
   ],
-  passes: 3, spreadM: 0.0048, angularSpreadRad: 0.17,
-  recoverySpreadM: 0.017, startFadeM: 0.038, shoulderReturn: 0.32, relaxation: 0.68
+  passes: 3, spreadM: 0.010, angularSpreadRad: 0.17,
+  startFadeM: 0.038, relaxation: 0.68
 });
 
 export const comparisonConfig = Object.freeze({ heightM: 1.24, minHeightM: 1.11, minWidthM: 0.86, cameraDistanceM: 2.4 });
