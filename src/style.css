@@ -13,6 +13,8 @@ main { width: min(100%, 1180px); margin: auto; padding: 30px 30px 20px; }
 .header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 18px; }
 h1 { margin: 0; font-family: Georgia, 'Yu Mincho', serif; font-weight: 530; font-size: clamp(1.1rem, 3.5vw, 2.05rem); letter-spacing: .02em; }
 .header p { margin: 5px 0 0; font-size: .8rem; color: #655d56; }
+.preset-field { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: .8rem; }
+.preset-field select { min-height: 34px; padding: 4px 8px; max-width: 62vw; }
 .probe-link { color: #514742; font-size: .75rem; white-space: nowrap; text-underline-offset: .24em; }
 .viewer { border: 1px solid var(--line); border-radius: 13px; background: #fbf8f3; overflow: clip; }
 .stage {

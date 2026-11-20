@@ -5,7 +5,7 @@ const smoothstep = (value, lo, hi) => {
   return t * t * (3 - 2 * t);
 };
 
-export function createKneeHighInput(surface, garment, level) {
+export function createStockingLegInput(surface, garment, level) {
   const { columns, rows } = level;
   const size = (columns + 1) * (rows + 1);
   const pairs = new Float32Array(size * 2);
@@ -25,7 +25,7 @@ export function createKneeHighInput(surface, garment, level) {
     const rowEase = ease(arc);
     const fineWrinkles = smoothstep(arc, fineStart, fineIn) * (1 - smoothstep(arc, fineOut, fineEnd));
     if (row) relaxedArc[row] = relaxedArc[row - 1] + ease(arc - sampleStrideM / 2) * sampleStrideM;
-    const upperBand = smoothstep(arc, garment.topM - garment.cuffWidthM - 0.004, garment.topM - garment.cuffWidthM + 0.004);
+    const upperBand = garment.upper ? 0 : smoothstep(arc, garment.topM - garment.cuffWidthM - 0.004, garment.topM - garment.cuffWidthM + 0.004);
     const reinforcedToe = 1 - smoothstep(arc, garment.toeEndM - 0.009, garment.toeEndM + 0.008);
     const reinforcement = 1 + (garment.cuffYarnCount - 1) * upperBand + (garment.toeYarnCount - 1) * reinforcedToe;
 
@@ -49,7 +49,8 @@ export function createKneeHighInput(surface, garment, level) {
       const lo = Math.max(0, arc - span);
       const hi = arc + span;
       const ds = distance(surface.point(hi, theta), surface.point(lo, theta)) / (hi - lo);
-      const hem = smoothstep(arc, 0.251, 0.295) * (1 - smoothstep(arc, garment.topM - garment.cuffWidthM - 0.009, garment.topM));
+      const endFade = garment.upper ? 0.014 : garment.cuffWidthM + 0.009;
+      const hem = smoothstep(arc, 0.251, 0.295) * (1 - smoothstep(arc, garment.topM - endFade, garment.topM));
       input.set([
         ...pos, arc, ...normal, theta,
         dc / unloadedRadius, ds / rowEase, hem, reinforcement,

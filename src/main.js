@@ -6,7 +6,7 @@ import { createTextileMaterial } from './core/textile/material.js';
 import { measureFrames, summarize } from './core/ui/metrics.js';
 import { connectOrbit } from './core/ui/pointer-router.js';
 import {
-  comparisonConfig, diagnostics, meshLevels, preset, renderConfig, tissueDisplay
+  comparisonConfig, diagnostics, meshLevels, renderConfig, tissueDisplay
 } from './config/stage1a.js';
 import { buildFitting, disposeFitting } from './stocking/build-fitting.js';
 import { connectBodyControls } from './stocking/body-controls.js';
@@ -16,6 +16,7 @@ import { createStageCamera } from './stocking/stage-camera.js';
 import { createComparisonView } from './stocking/comparison-view.js';
 import { collectFitMetrics } from './stocking/stage1a-metrics.js';
 import { measureFootFit } from './stocking/foot-fit-metrics.js';
+import { garments, textileOptics } from './config/garments.js';
 import { dressingConfig } from './config/dressing.js';
 import { createDressingPlayer } from './stocking/dressing-player.js';
 
@@ -44,6 +45,8 @@ export async function start() {
   const comparisonLabels = document.getElementById('comparison-labels');
   const controls = Array.from(document.querySelectorAll('.toolbar [data-view]'));
   const viewMode = document.getElementById('display-mode');
+  const garmentSelect = document.getElementById('garment-preset');
+  const garmentNote = document.getElementById('preset-note');
   if (query.has('capture')) document.documentElement.classList.add('capture');
 
   const result = { errors: [], validationErrors: 0, revision: null };
@@ -71,19 +74,16 @@ export async function start() {
   views['dressing-split'] = dressingConfig.splitView;
   const solver = await withGpuValidation(device, reportError, () => createStaticShellSolver(device));
   const solve = (...args) => withGpuValidation(device, reportError, () => solver(...args));
-  let fitting = await buildFitting({}, solve, 7);
-  const optics = {
-    ...preset,
-    cellPitchM: [
-      2 * Math.PI * preset.relaxedRadiusM / Math.round(2 * Math.PI * preset.relaxedRadiusM / preset.cellPitchM[0]),
-      preset.cellPitchM[1]
-    ]
-  };
+  const requestedGarment = query.get('garment');
+  const initialGarment = Object.hasOwn(garments, requestedGarment) ? garments[requestedGarment] : garments['knee-high'];
+  let fitting = await buildFitting({}, solve, 7, initialGarment);
+  let optics = textileOptics(initialGarment);
   const cloth = createTextileMaterial(optics, diagnostics);
-  const unloadedGeometry = createUnloadedGeometry(fitting.frame);
+  let yarn = { radiusM: cloth.radiusM, netRadiusM: cloth.netRadiusM };
+  let unloadedGeometry = createUnloadedGeometry(fitting.frame);
   const { scene, textile, unloaded, setSkinLoaded, setBody, setTissueMap, setClothGeometry,
     setBodyVisible, setNailsVisible } = createStudio(
-    renderConfig, fitting.body, fitting.geometry, unloadedGeometry, cloth.material, tissueDisplay
+    renderConfig, fitting.body, fitting.geometry, unloadedGeometry, cloth.material, tissueDisplay, fitting.joined
   );
   const { camera, target, setView: positionCamera, setAspect, rotate, zoom, zoomRatio } = createStageCamera(views, anchor => {
     const { frame, surface, body } = fitting;
@@ -118,7 +118,7 @@ export async function start() {
     device, getFitting: () => fitting, onError: reportError,
     onBlocked: () => { dressingPosition.value = '接触で停止'; },
     show: (geometry, progress, elapsed, framesPerSecond) => {
-      setClothGeometry(geometry);
+      setClothGeometry(geometry, progress === 1 ? fitting.joined : null);
       if (!draggingProgress) dressingProgress.value = Math.round(1000 * progress);
       const label = progress === 1 ? '着用中' : progress === 0 ? '脱衣後' : Math.round(progress * 100) + '%';
       dressingPosition.value = label;
@@ -146,14 +146,16 @@ export async function start() {
     comparisonLabels.children[0].textContent = split ? '素脚' : '両脚に着用';
     comparisonLabels.children[1].textContent = draped ? '脱衣後の布' : '未着用（無荷重）';
     viewMode.disabled = !textile.visible || measuring;
-    for (const mode of [3, 6, 7]) viewMode.options[mode].disabled = progress < 1;
+    for (const mode of [3, 6, 7]) {
+      viewMode.options[mode].disabled = progress < 1 || Boolean(fitting.joined && mode >= 6);
+    }
     if (viewMode.selectedOptions[0]?.disabled) setDisplay(0);
     dressingArrangement.value = arrangement;
     updateLegend();
   }
 
   function enterDressing() {
-    if (measuring) return;
+    if (measuring || fitting.garment.upper) return;
     if (tissueVisible) setTissueVisible(false);
     if (viewingBarefoot) setBarefoot(false);
     dressingControls.hidden = false;
@@ -227,6 +229,7 @@ export async function start() {
 
   function setView(viewId) {
     if (!views[viewId]) return false;
+    if (fitting.garment.upper && (viewId === 'comparison' || viewId.startsWith('dressing'))) viewId = 'front';
     currentView = viewId;
     userMovedCamera = false;
     positionCamera(viewId);
@@ -341,7 +344,7 @@ export async function start() {
   }
 
   async function meshBenchmarks(repeats, includeRendering = false, includeFootFit = false) {
-    const { measureSolve, surface, geometry, body: { foot } } = fitting;
+    const { measureSolve, surface, geometry, joined, assemble, body: { foot } } = fitting;
     const results = [];
     for (const level of meshLevels) {
       const { fitted, prepareMs } = await measureSolve(level, repeats);
@@ -351,16 +354,20 @@ export async function start() {
       };
       if (includeRendering || includeFootFit) {
         const measuredGeometry = createClothGeometry(fitted);
+        let whole;
         try {
           if (includeFootFit) {
             measured.footFit = measureFootFit(measuredGeometry, foot, surface.footDistance, surface.footLimitM);
           }
           if (includeRendering) {
-            setClothGeometry(measuredGeometry);
+            whole = assemble(fitted, measuredGeometry);
+            if (whole) measured.wornTriangles = whole.index.count / 3;
+            setClothGeometry(measuredGeometry, whole);
             measured.fullView = await profileView('front', 45);
           }
         } finally {
-          setClothGeometry(geometry);
+          setClothGeometry(geometry, joined);
+          whole?.dispose();
           measuredGeometry.dispose();
         }
       }
@@ -372,24 +379,47 @@ export async function start() {
   function updateFitStats() {
     const { frame } = fitting;
     document.getElementById('mesh-stats').textContent =
-      format.format(frame.points) + ' 計算点 · ' + format.format(frame.triangles) + ' 三角形';
+      format.format(frame.points) + ' 計算点（片脚） · '
+      + format.format(fitting.joined ? fitting.joined.index.count / 3 : frame.triangles * 2) + ' 三角形（着用面）';
     document.getElementById('solve-stats').textContent =
       '布計算 ' + summarize(frame.elapsedMs).medianMs.toFixed(2) + ' ms';
   }
 
-  async function applyBody(values) {
+  function syncGarmentControls() {
+    const { garment } = fitting;
+    garmentSelect.value = garment.id;
+    for (const button of [dressingOpen, controls.find(item => item.dataset.view === 'comparison')]) {
+      button.disabled = Boolean(garment.upper);
+    }
+    garmentNote.textContent = garment.upper ? '静止着用 · 着脱と無荷重比較はニーハイで利用できます' : '';
+    garmentNote.hidden = !garment.upper;
+    canvas.setAttribute('aria-label', garment.label + 'の3D表示');
+  }
+
+  async function updateFitting(values, garment) {
     if (measuring) return false;
-    if (Object.entries(fitting.dimensions).every(([id, value]) => values[id] === value)) return true;
+    if (garment === fitting.garment && Object.entries(fitting.dimensions).every(([id, value]) => values[id] === value)) return true;
     measuring = true;
+    garmentSelect.disabled = true;
     try {
       await dressing.pause();
-      const next = await buildFitting(values, solve, 5);
+      const next = await buildFitting(values, solve, 5, garment);
       const previous = fitting;
+      const previousUnloaded = unloadedGeometry;
+      unloadedGeometry = createUnloadedGeometry(next.frame);
       fitting = next;
+      optics = textileOptics(garment);
+      yarn = cloth.setOptics(optics);
       setBody(next.body);
-      setClothGeometry(next.geometry);
-      updateArrangement(1);
+      setClothGeometry(next.geometry, next.joined);
       dressing.reset();
+      if (garment.upper) {
+        dressingControls.hidden = true;
+        dressingOpen.setAttribute('aria-expanded', 'false');
+        arrangement = 'together';
+      }
+      syncGarmentControls();
+      updateArrangement(1);
       dressingProgress.value = '1000';
       dressingPosition.value = '着用中';
       setSkinLoaded(textile.visible);
@@ -399,17 +429,25 @@ export async function start() {
       frameStats.textContent = '';
       exposeCapture();
       disposeFitting(previous);
+      previousUnloaded.dispose();
       return true;
     } catch (error) {
-      reportError('体型の更新', error);
+      garmentSelect.value = fitting.garment.id;
+      reportError('着用フィットの更新', error);
       throw error;
     } finally {
       measuring = false;
+      garmentSelect.disabled = false;
       viewMode.disabled = !textile.visible;
       requestDraw();
     }
   }
 
+  const applyBody = values => updateFitting(values, fitting.garment);
+  const applyGarment = id => Object.hasOwn(garments, id) && updateFitting(fitting.dimensions, garments[id]);
+  garmentSelect.addEventListener('change', () => {
+    applyGarment(garmentSelect.value)?.catch(error => { console.error(error); });
+  });
   const updateMapButton = connectBodyControls({
     initial: fitting.dimensions,
     onApply: applyBody,
@@ -439,6 +477,7 @@ export async function start() {
     if (measuring) return;
     measuring = true;
     benchmarkButton.disabled = true;
+    garmentSelect.disabled = true;
     viewMode.disabled = true;
     output.textContent = '計測中…';
     const restoreView = currentView;
@@ -471,6 +510,7 @@ export async function start() {
     } finally {
       measuring = false;
       benchmarkButton.disabled = false;
+      garmentSelect.disabled = false;
       viewMode.disabled = false;
       setView(restoreView);
       setDisplay(restoreDisplay);
@@ -491,10 +531,12 @@ export async function start() {
     requestAnimationFrame(() => { resizeQueued = false; resize(); });
   }).observe(document.getElementById('stage'));
 
+  syncGarmentControls();
   setView(views[query.get('view')] ? query.get('view') : defaultView);
   const initialMode = Number(query.get('display') || 0);
   setBarefoot(query.get('barefoot') === '1');
   setDisplay(Number.isInteger(initialMode) && initialMode >= 0 && initialMode <= 7 ? initialMode : 0);
+  updateArrangement();
   resize();
   await withGpuValidation(device, reportError, async () => {
     draw();
@@ -513,14 +555,14 @@ export async function start() {
       result, setView, setDisplay, setBarefoot, setTissueVisible, profileView, meshBenchmarks, unloadedGeometry,
       dressing: { inspect: dressing.inspect, move: dressing.move, pause: dressing.pause, status: dressing.status },
       surface,
-      applyBody, dimensions,
-      ...collectFitMetrics(frame, surface, optics, cloth.radiusM),
+      applyBody, applyGarment, dimensions, garment: fitting.garment.id, yarn, joined: fitting.joined,
+      ...collectFitMetrics(frame, surface, optics, yarn.radiusM),
       footFit: measureFootFit(geometry, body.foot, surface.footDistance, surface.footLimitM),
       lowerBody: { ...body, textile, tissueField },
       initial: { points: frame.points, triangles: frame.triangles, prepareMs: initial.prepareMs, ...summarize(frame.elapsedMs) }
     };
   }
   exposeCapture();
-  dressingOpen.disabled = false;
+  garmentSelect.disabled = false;
   if (query.get('view') === 'dressing' && !query.has('capture')) enterDressing();
 }

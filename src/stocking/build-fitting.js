@@ -1,13 +1,14 @@
 import { footAnatomy } from '../config/foot-anatomy.js';
-import { material, meshLevels, preset, tissue } from '../config/stage1a.js';
+import { meshLevels, preset, material, tissue } from '../config/stage1a.js';
 import { createLeg } from '../core/body/leg-model.js';
 import { createLowerBodyGeometry } from '../core/body/lower-body.js';
 import { updateTissueField, wrapCompliantSurface } from '../core/body/soft-tissue.js';
 import { createClothGeometry } from '../core/cloth/geometry.js';
-import { createKneeHighInput } from './rest-shape.js';
+import { createStockingLegInput } from './rest-shape.js';
+import { createWaistShell } from './waist-shell.js';
 import { createBodyTissue, resolveBodyShape } from './body-shape.js';
 
-export async function buildFitting(values, solve, repeats) {
+export async function buildFitting(values, solve, repeats, garment = { ...preset, material }) {
   const { dimensions, profile, pelvis } = resolveBodyShape(values);
   const leg = createLeg(profile, footAnatomy);
   const tissueMap = createBodyTissue({ pelvis }, leg.skinSurface);
@@ -16,14 +17,15 @@ export async function buildFitting(values, solve, repeats) {
     if (!heights.has(arc)) heights.set(arc, leg.section(arc).y);
     return tissueMap.sampleLeg(heights.get(arc), angle);
   };
+  const legPattern = garment.upper ? { ...garment, topM: pelvis.joinArc } : garment;
   const standard = meshLevels.find(level => level.id === 'standard');
   let surface = leg;
   let tissueField;
   async function measureSolve(level, samples) {
     const start = performance.now();
-    const input = createKneeHighInput(surface, preset, level);
+    const input = createStockingLegInput(surface, legPattern, level);
     const prepareMs = performance.now() - start;
-    const fitted = await solve(input, material, samples);
+    const fitted = await solve(input, garment.material, samples);
     return { fitted, prepareMs };
   }
 
@@ -41,11 +43,16 @@ export async function buildFitting(values, solve, repeats) {
     bare: createLowerBodyGeometry(leg.skinSurface, foot, skinStart, pelvis),
     loaded: createLowerBodyGeometry(wrapCompliantSurface(leg.skinSurface, tissueField), foot, skinStart, pelvis)
   };
-  return { body, dimensions, surface, tissueField, frame, initial, measureSolve, geometry: createClothGeometry(frame) };
+  const geometry = createClothGeometry(frame);
+  const assemble = (legFrame, legGeometry) => garment.upper
+    ? createWaistShell(surface, pelvis, garment, legFrame, legGeometry) : null;
+  return { body, dimensions, surface, tissueField, frame, initial, measureSolve, geometry,
+    joined: assemble(frame, geometry), assemble, garment };
 }
 
-export function disposeFitting({ geometry, body }) {
+export function disposeFitting({ geometry, joined, body }) {
   geometry.dispose();
+  joined?.dispose();
   body.bare.dispose();
   body.loaded.dispose();
   body.foot.dispose();

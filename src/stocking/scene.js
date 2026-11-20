@@ -5,7 +5,7 @@ import {
 import { uv, wgslFn } from 'three/tsl';
 import { addTissueColors } from './tissue-colors.js';
 
-export function createStudio(config, body, clothGeometry, unloadedGeometry, clothMaterial, tissueDisplay) {
+export function createStudio(config, body, clothGeometry, unloadedGeometry, clothMaterial, tissueDisplay, wholeGeometry) {
   const scene = new Scene();
   scene.background = new Color(config.background);
 
@@ -28,6 +28,19 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
     textile.add(stocking);
   }
   scene.add(nails);
+  const legs = textile.children.slice();
+  const whole = new Mesh(wholeGeometry ?? clothGeometry, clothMaterial);
+  whole.renderOrder = 2;
+  textile.add(whole);
+  function setClothGeometry(geometry, joined) {
+    whole.visible = Boolean(joined);
+    if (joined) whole.geometry = joined;
+    for (const leg of legs) {
+      leg.geometry = geometry;
+      leg.visible = !joined;
+    }
+  }
+  setClothGeometry(clothGeometry, wholeGeometry);
   scene.add(textile);
   const unloaded = new Mesh(unloadedGeometry, clothMaterial);
   unloaded.renderOrder = 2;
@@ -76,8 +89,6 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
       torso.material = enabled ? map : skin;
       nails.visible = !enabled;
     },
-    setClothGeometry: geometry => {
-      for (const stocking of textile.children) stocking.geometry = geometry;
-    }
+    setClothGeometry
   };
 }

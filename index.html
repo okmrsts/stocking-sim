@@ -22,7 +22,16 @@
     <header class="header">
       <div>
         <h1>ストッキング・シミュレーター</h1>
-        <p>20D 平編みニーハイ</p>
+        <div class="preset-field">
+          <label for="garment-preset">プリセット</label>
+          <select id="garment-preset" disabled>
+            <option value="knee-high">20D 平編みニーハイ</option>
+            <option value="pantyhose">20D 平編みパンスト</option>
+            <option value="tights">60D タイツ</option>
+            <option value="fishnet">網タイツ</option>
+          </select>
+        </div>
+        <p id="preset-note" role="status" hidden></p>
       </div>
       <a class="probe-link" href="./checks/0/probe.html">WebGPU診断</a>
     </header>

@@ -1,6 +1,8 @@
+import { diamondNetShader } from './diamond-net.wgsl.js';
+
 export const fabricShader = /* wgsl */ `
 fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>, contactM: f32,
-  worldNormal: vec3<f32>, eye: vec3<f32>, pitch: vec2<f32>, data: vec4<f32>,
+  worldNormal: vec3<f32>, eye: vec3<f32>, pitch: vec2<f32>, data: vec4<f32>, netPitch: vec2<f32>,
   tint: vec3<f32>, mode: f32, maxima: vec4<f32>) -> vec4<f32> {
   let normalDir = normalize(worldNormal);
   let viewDir = normalize(eye);
@@ -9,6 +11,10 @@ fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>, co
   let px = dpdx(cycles);
   let py = dpdy(cycles);
   let footprint = max(length(px), length(py));
+  let netCycles = materialUV / netPitch;
+  let netDx = dpdx(netCycles);
+  let netDy = dpdy(netCycles);
+  let solid = select(1.0, smoothstep(1.04, 1.39, cloth.z), data.z > 0.5);
   let metric = vec2<f32>(fields.x * cloth.w / data.y, fields.y);
   let cell = max(vec2<f32>(0.00008), pitch * metric);
   let radius = data.x;
@@ -23,7 +29,7 @@ fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>, co
 
   var filtered = coarseOpacity;
   var fiber = 0.0;
-  if (footprint < 0.44) {
+  if (footprint < 0.44 && solid > 0.0) {
     let shift = 0.5 * (course - 2.0 * floor(0.5 * course));
     let x = fract(cycles.x + shift) - 0.5;
     let neighborX = fract(cycles.x + 0.5 - shift) - 0.5;
@@ -47,6 +53,13 @@ fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>, co
     fiber = edge * sqrt(max(0.0, 1.0 - normalizedRadius * normalizedRadius)) * (1.0 - blend) * overUnder;
   }
 
+  if (solid < 1.0) {
+    let netCell = max(vec2<f32>(0.00008), metric * netPitch);
+    let coverage = diamondCoverage(netCycles, netDx, netDy, netCell, data.w);
+    let threadOpacity = 1.0 - exp(-2.65 / facing);
+    filtered = mix(coverage.x * threadOpacity, filtered, solid);
+    fiber = mix(coverage.x * 0.72 + coverage.y * 0.28, fiber, solid);
+  }
   let lamp = normalize(vec3<f32>(-0.64, 0.65, 0.53));
   let diffuse = max(0.0, dot(normalDir, lamp));
   let specular = pow(max(0.0, dot(normalDir, normalize(lamp + viewDir))), 15.0);
@@ -56,7 +69,14 @@ fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>, co
     var scalar = max(fields.z, fields.w) / maxima.x;
     if (mode > 1.5) { scalar = max(0.0, fields.x - 1.0) / maxima.y; }
     if (mode > 2.5) { scalar = cloth.x * 1000.0 / maxima.z; }
-    if (mode > 3.5) { scalar = coarseOpacity; }
+    if (mode > 3.5) {
+      scalar = coarseOpacity;
+      if (solid < 1.0) {
+        let halfWidth = clamp(data.w * length(1.0 / (metric * netPitch)), 0.0, 0.48);
+        scalar = mix((1.0 - pow(1.0 - 2.0 * halfWidth, 2.0)) * (1.0 - exp(-2.65 / facing)),
+          coarseOpacity, solid);
+      }
+    }
     if (mode > 4.5) { scalar = 0.0; }
     if (mode > 5.5) { scalar = cloth.y / 5000.0; }
     if (mode > 6.5) { scalar = contactM * 1000.0 / maxima.w; }
@@ -114,4 +134,5 @@ fn heatRamp(value: f32) -> vec3<f32> {
   let red = vec3<f32>(0.92, 0.20, 0.044);
   return mix(mix(blue, green, smoothstep(0.0, 0.52, t)), red, smoothstep(0.46, 1.0, t));
 }
+${diamondNetShader}
 `;

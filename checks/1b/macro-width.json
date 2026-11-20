@@ -1,0 +1,41 @@
+{
+  "pantyhose": {
+    "thigh-macro": {
+      "medianPx": 18.0,
+      "ridgeSamples": 3865,
+      "approxMicrometers": 60.60323701770902
+    },
+    "ankle-macro": {
+      "medianPx": 18.0,
+      "ridgeSamples": 5758,
+      "approxMicrometers": 60.60323701770902
+    },
+    "relativeDifferencePercent": 0.0
+  },
+  "tights": {
+    "thigh-macro": {
+      "medianPx": 30.463092423455635,
+      "ridgeSamples": 2538,
+      "approxMicrometers": 102.56455613505875
+    },
+    "ankle-macro": {
+      "medianPx": 30.463092423455635,
+      "ridgeSamples": 3038,
+      "approxMicrometers": 102.56455613505875
+    },
+    "relativeDifferencePercent": 0.0
+  },
+  "fishnet": {
+    "thigh-macro": {
+      "medianPx": 66.2117814289874,
+      "ridgeSamples": 694,
+      "approxMicrometers": 222.92490462809263
+    },
+    "ankle-macro": {
+      "medianPx": 66.48308055437865,
+      "ridgeSamples": 1134,
+      "approxMicrometers": 223.83832713913614
+    },
+    "relativeDifferencePercent": 0.408906752433656
+  }
+}
