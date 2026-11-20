@@ -42,8 +42,20 @@ Linux x64、Chrome Headless Shell 151.0.7922.34、SwiftShader。実行時の CDN
 | 全体 | 11.77 | 100.0 ms |
 | 太ももの極限マクロ | 5.30 | 200.1 ms |
 
-WebGPU 検証エラー 0 件。モバイル表示の Chromium エミュレーションで横スクロールが発生せず、マクロの切替、設定シートの閉じるボタン、シートを閉じた後の診断表示を確認した。iPhone Safari の段階1aの FPS は未計測。iPhone の 30 FPS の上限については [0008](../../docs/decisions/0008-stage1a-fit-and-mesh-budget.md) を参照。
+Chrome Headless Shell での WebGPU 検証エラーは 0 件。モバイル表示の Chromium エミュレーションで横スクロールが発生せず、マクロの切替、設定シートの閉じるボタン、シートを閉じた後の診断表示を確認した。
 
 別の確認として、390 × 844・DPR 1 の Chromium モバイル表示で、公開ページと同じUIの計測ボタンを実行した。低・標準・高の全体 FPS は順に 37.5、27.3、26.2。標準の極限マクロは 23.9 FPS。いずれも SwiftShader で、Safari 実機の値ではない。
+
+### iPhone Safari 実機
+
+ユーザーが iPhone 18 Pro・iOS 27.3 の Safari で、公開版 `62c32f8` の計測結果を確認した。画面に表示された標準メッシュの全体・極限マクロはどちらも 30.0 FPS。
+
+| メッシュ | 計算点 | 三角形 | 布計算1回の中央値 | 布計算95%点 | 全体 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 低 | 9,061 | 17,640 | 1.00 ms | 1.00 ms | 30.0 FPS |
+| 標準 | 22,945 | 45,120 | 1.00 ms | 1.00 ms | 30.0 FPS |
+| 高 | 43,165 | 85,272 | 1.00 ms | 1.00 ms | 30.0 FPS |
+
+計測画面の表示値で、全体30 FPSの目標を3種類とも達成した。今回30.0 FPSを確認した最大は 43,165 計算点・85,272 三角形。実機の描画余力と、それを超える解像度の性能は未計測。[メッシュの採用判断](../../docs/decisions/0008-stage1a-fit-and-mesh-budget.md)
 
 計測の詳細は [result.json](result.json)。再現にはリポジトリルートから `node checks/1a/capture.cjs /path/to/chrome-headless-shell /path/to/cdn-cache` を実行する。キャッシュの内容は [段階0](../0/README.md) と同じ。PNG の糸幅比較は NumPy、Pillow、SciPy がある Python で `python3 checks/1a/measure-yarn.py` を実行する。
