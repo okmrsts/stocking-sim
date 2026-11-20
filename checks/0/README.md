@@ -31,8 +31,14 @@ node checks/0/capture.cjs /path/to/chrome-headless-shell /path/to/cdn-cache
 
 Headless Shell から CDN への直接接続は応答を得られなかったため、実測時は CDN から取得し npm 配布とバイト一致を確認した JavaScript を、同じ要求 URL にテスト側から返した。外部 CDN の実機接続は公開後に確認する。
 
-## Netlify
+## 公開準備
+
+[GitHub リポジトリ](https://github.com/okmrsts/stocking-sim) の `main` ブランチに静的配信ファイルを置き、GitHub Pages の参照先を `/(root)` にする。GitHub Pages の公開完了は、公開 URL が診断ページを配信していることの確認後に記録する。
+
+### Netlify の準備記録
 
 [stocking-sim プロジェクト](https://app.netlify.com/projects/stocking-sim) は作成済み。初回デプロイは未実施。ChatGPT の Netlify MCP 接続でプロジェクトの作成・取得とデプロイ一覧を確認した。この接続ではデプロイを開始する操作を利用できなかった。Netlify ダッシュボードへのログインも完了していない。
 
-初回はリポジトリの `index.html` だけを含む配信用フォルダーを、対象プロジェクトの Deploys にアップロードする。現在のサイトの訪問者設定は全デプロイに Netlify のチームログインを要求する。公開 URL が発行されたら、iPhone Safari でアクセスし、青緑の三角形と「WebGPU 描画成功 · 検証エラー 0件」を確認する。エラー時は表示された詳細、端末の機種、iOS の版を記録する。
+Netlify では全デプロイの閲覧にチームログインを要求する設定だった。
+
+GitHub Pages の公開 URL が発行されたら、iPhone Safari で青緑の三角形と「WebGPU 描画成功 · 検証エラー 0件」を確認する。エラー時は表示された詳細、端末の機種、iOS の版を記録する。

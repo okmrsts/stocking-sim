@@ -6,7 +6,7 @@ WebGPU 専用の布シミュレーターを段階ごとに作ります。段階0
 
 リポジトリのルートで `python3 -m http.server 8765` を実行し、WebGPU に対応したブラウザーで [localhost](http://localhost:8765/) を開きます。ビルドやパッケージのインストールは不要です。CDN に接続できる必要があります。
 
-公開先は Netlify です。段階0の配信に必要なファイルはルートの `index.html` です。Netlify にはこのファイルを含む配信用フォルダーをデプロイします。[公開状況と撮影検証](checks/0/README.md)
+GitHub Pages の公開用ファイルは、リポジトリルートの `index.html` と `.nojekyll` です。配信元を `main` の `/(root)` に設定して公開します。[公開状況と撮影検証](checks/0/README.md)
 
 ## ファイル
 
