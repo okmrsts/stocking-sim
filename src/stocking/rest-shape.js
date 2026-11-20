@@ -15,6 +15,7 @@ export function createKneeHighInput(surface, garment, level) {
   const relaxedRadiiM = new Float32Array(rows + 1);
   const reinforcementByRow = new Float32Array(rows + 1);
   const arcs = Array.from({ length: rows + 1 }, (_, row) => row * sampleStrideM);
+  const [fineStart, fineIn, fineOut, fineEnd] = garment.fineWrinkleZone;
   const ease = arc => garment.axialEase + garment.axialEaseZones.reduce(
     (lengthRatio, zone) => lengthRatio + zone.lengthRatioDelta * gaussian(arc, zone.arcM, zone.widthM), 0
   );
@@ -22,6 +23,7 @@ export function createKneeHighInput(surface, garment, level) {
   for (let row = 0; row <= rows; row++) {
     const arc = arcs[row];
     const rowEase = ease(arc);
+    const fineWrinkles = smoothstep(arc, fineStart, fineIn) * (1 - smoothstep(arc, fineOut, fineEnd));
     if (row) relaxedArc[row] = relaxedArc[row - 1] + ease(arc - sampleStrideM / 2) * sampleStrideM;
     const upperBand = smoothstep(arc, garment.topM - garment.cuffWidthM - 0.004, garment.topM - garment.cuffWidthM + 0.004);
     const reinforcedToe = 1 - smoothstep(arc, garment.toeEndM - 0.009, garment.toeEndM + 0.008);
@@ -43,15 +45,16 @@ export function createKneeHighInput(surface, garment, level) {
 
       // The two local derivatives measure actual contact-surface distances.
       const dc = distance(surface.point(arc, theta + 0.003), surface.point(arc, theta - 0.003)) / 0.006;
-      const lo = Math.max(0, arc - 0.0006);
-      const hi = arc + 0.0006;
+      const span = 0.0006 + 0.003 * fineWrinkles;
+      const lo = Math.max(0, arc - span);
+      const hi = arc + span;
       const ds = distance(surface.point(hi, theta), surface.point(lo, theta)) / (hi - lo);
       const hem = smoothstep(arc, 0.251, 0.295) * (1 - smoothstep(arc, garment.topM - garment.cuffWidthM - 0.009, garment.topM));
       input.set([
         ...pos, arc, ...normal, theta,
         dc / unloadedRadius, ds / rowEase, hem, reinforcement,
         1 + (garment.cuffStiffness - 1) * upperBand + 0.22 * reinforcedToe,
-        dc, unloadedRadius, rowEase
+        dc, unloadedRadius, fineWrinkles
       ], node * 16);
       pairs.set([circum, relaxedArc[row]], node * 2);
     }

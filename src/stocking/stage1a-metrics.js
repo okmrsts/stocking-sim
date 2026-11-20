@@ -12,9 +12,12 @@ export function collectFitMetrics(frame, surface, optics, radiusM) {
     return [name, { ...sample, normalOpacity: normalOpacity(sample, optics, radiusM) }];
   }));
   function gapRange(arcCenter, halfWidth, angle) {
-    const values = frame.arcs.filter(arc => Math.abs(arc - arcCenter) <= halfWidth)
-      .map(arc => sampleCloth(frame, surface, arc, angle).gapMm);
-    return { minMm: Math.min(...values), maxMm: Math.max(...values), samples: values.length };
+    const arcs = frame.arcs.filter(arc => Math.abs(arc - arcCenter) <= halfWidth);
+    const values = arcs.map(arc => sampleCloth(frame, surface, arc, angle).gapMm);
+    const crestArcsMm = arcs.filter((_, i) => i > 0 && i < values.length - 1
+      && values[i] >= values[i - 1] && values[i] - values[i + 1] > 0.01)
+      .map(arc => 1000 * arc);
+    return { minMm: Math.min(...values), maxMm: Math.max(...values), samples: values.length, crestArcsMm };
   }
   const relation = [];
   let contactPoints = 0, maxCorrectionMm = 0, reversedPoints = 0;

@@ -4,15 +4,17 @@ export const preset = Object.freeze({
   relaxedRadiusM: 0.0240, relaxedToeRadiusM: 0.0184, axialEase: 0.941,
   axialEaseZones: [
     { arcM: 0.108, widthM: 0.073, lengthRatioDelta: -0.030 },
-    { arcM: 0.320, widthM: 0.035, lengthRatioDelta: 0.060 },
+    { arcM: 0.320, widthM: 0.035, lengthRatioDelta: 0.043 },
     { arcM: 0.621, widthM: 0.035, lengthRatioDelta: -0.025 }
   ],
+  fineWrinkleZone: [0.244, 0.264, 0.378, 0.408],
   cuffStiffness: 1.30, cuffYarnCount: 2.15, toeYarnCount: 1.95,
   cellPitchM: [0.00047, 0.00045], dyeLinear: [0.026, 0.025, 0.036]
 });
 
 export const material = Object.freeze({
   radialClearanceM: 0.00042, wrinklingWavelengthM: 0.024, compressionThreshold: 0.011,
+  fineWrinkleWavelengthM: 0.0095, fineWrinkleAmplitudeM: 0.00040,
   maxWrinkleAmplitudeM: 0.00275, selfClearanceM: 0.00042, selfContactIterations: 4, poisson: 0.075, hoopModulusNpm: 22,
   axialModulusNpm: 18, hoopHardening: 0.9, axialHardening: 2.5
 });

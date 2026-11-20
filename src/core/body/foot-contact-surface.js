@@ -17,15 +17,27 @@ export function withFootEnvelope(leg, foot, { skinJoinM: joinArc, bounds, contac
   const height = contact.forefootSamplingHeightM;
   const frontReduction = leg.section(0).z - tipZ - contact.toeTipExtraM;
   const insetZ = tipZ - contact.samplePitchM;
+  const [pivotY, pivotZ] = contact.ankleFanPivotM;
+  const [fanStart, fanEnd] = contact.ankleFanBlendM;
+  const [bridgeStart, bridgeEnd] = contact.toeBridgeBlendZM;
+  const [dorsalStart, dorsalEnd] = contact.dorsalBlendHeightM;
   // Span small changes between adjacent toe tips before triangulating the cloth.
   const toeField = (x, y, z) => {
     const field = foot.sample(x, y, z);
-    return field <= 0 ? field : Math.min(field, foot.sample(x, y, z - contact.toeBridgeM));
+    if (field <= 0 || z <= bridgeStart) return field;
+    const bridge = contact.toeBridgeM * smooth((z - bridgeStart) / (bridgeEnd - bridgeStart));
+    return Math.min(field, foot.sample(x, y, z - bridge));
   };
   for (let row = 0; row <= rows; row++) {
     const arc = joinArc * row / rows;
-    const { x, y, z } = leg.section(arc);
+    const { x, y, z, pitch } = leg.section(arc);
     const center = [x, y, z];
+    // Aim the turning sections through a common point outside the anterior ankle.
+    // Rotating each section around its own center can send neighboring rings
+    // backward across the same patch of skin on the inside of the bend.
+    const fanWeight = smooth((arc - fanStart) / (fanEnd - fanStart));
+    const turn = fanWeight ? fanWeight * (Math.atan2(Math.max(0, pivotY - y), pivotZ - z) - pitch) : 0;
+    const turnCos = Math.cos(turn), turnSin = Math.sin(turn);
     const zFit = z - frontReduction * (1 - smooth(arc / contact.toeCapBlendM));
     const toeWeight = smooth((zFit - contact.forefootStartZM) / contact.forefootBlendM);
     const footWeight = 1 - smooth((arc - (joinArc - 0.031)) / 0.031);
@@ -41,7 +53,8 @@ export function withFootEnvelope(leg, foot, { skinJoinM: joinArc, bounds, contac
         const directionLength = Math.hypot(xDirection, yDirection);
         const dx = xDirection / directionLength, dy = yDirection / directionLength;
         const taper = 1 - 0.58 * smooth((zFit - insetZ) / (tipZ + contact.toeTipExtraM - insetZ));
-        const radius = taper * toeSlice.radius(dx, dy) + contact.toeClearanceM;
+        const plantarReserve = contact.toePlantarReserveM * smooth((-dy - 0.16) / 0.43);
+        const radius = taper * toeSlice.radius(dx, dy) + contact.toeClearanceM + plantarReserve;
         toe = [toeSlice.center[0] + dx * radius, toeSlice.center[1] + dy * radius, zFit];
       }
       if (toe && toeWeight === 1) {
@@ -52,10 +65,16 @@ export function withFootEnvelope(leg, foot, { skinJoinM: joinArc, bounds, contac
       const base = leg.point(arc, angle);
       const delta = difference(base, center);
       const radius = Math.hypot(...delta);
-      const direction = delta.map(value => value / radius);
+      const direction = [
+        delta[0], delta[1] * turnCos + delta[2] * turnSin, delta[2] * turnCos - delta[1] * turnSin
+      ].map(value => value / radius);
       const ray = gap => center.map((coordinate, axis) => coordinate + gap * direction[axis]);
       const skinRadius = outerSkinRadius(foot.sample, ray) ?? radius * 0.8;
-      const transitionClearance = 4 * toeWeight * (1 - toeWeight) * contact.blendClearanceM;
+      // The shallow plantar corner needs more room for chords between grid vertices.
+      const skinY = ray(skinRadius)[1];
+      const dorsal = smooth((skinY - dorsalStart) / (dorsalEnd - dorsalStart));
+      const transitionClearance = 4 * toeWeight * (1 - toeWeight) * contact.blendClearanceM
+        * mix(1, contact.dorsalBlendFraction, dorsal);
       const footPoint = ray(mix(radius, skinRadius + contact.footClearanceM, footWeight) + transitionClearance);
       if (toe) {
         // Preserve the clearance at the transition between the tilted and axial cuts.

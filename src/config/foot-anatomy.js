@@ -60,8 +60,12 @@ export const footAnatomy = {
   ],
   contact: {
     forefootStartZM: 0.073, forefootBlendM: 0.032,
-    toeTipExtraM: 0.0011, toeCapBlendM: 0.028, toeClearanceM: 0.0020, toeBridgeM: 0.0045,
-    footClearanceM: 0.0012, blendClearanceM: 0.00105,
+    toeTipExtraM: 0.00045, toeCapBlendM: 0.028, toeClearanceM: 0.00085, toeBridgeM: 0.0030,
+    toeBridgeBlendZM: [0.114, 0.132],
+    toePlantarReserveM: 0.00020,
+    footClearanceM: 0.00065, blendClearanceM: 0.00090,
+    dorsalBlendHeightM: [0.018, 0.037], dorsalBlendFraction: 0.35,
+    ankleFanPivotM: [0.106, 0.061], ankleFanBlendM: [0.112, 0.150],
     samplePitchM: 0.0009, forefootSamplingHeightM: 0.064
   },
   skinJoinM: 0.310, skinGridM: 0.0018,

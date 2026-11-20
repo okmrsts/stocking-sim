@@ -1,0 +1,342 @@
+{
+  "browser": "151.0.7922.34",
+  "topology": {
+    "components": 1,
+    "openEdges": 0,
+    "nonManifoldEdges": 0,
+    "inconsistentEdges": 0
+  },
+  "measurements": {
+    "navelHeightMm": 925.0439549010247,
+    "navelSectionDepthMm": 169.09136208082649,
+    "hipBreadthMm": 332.15554587295367,
+    "hipDepthMm": 206.36864354654273,
+    "crotchHeightMm": 711.511163152878,
+    "thighBreadthMm": 163.46806798062659,
+    "thighDepthMm": 180.81509017288326,
+    "thighCircumferenceMm": 541.5198295133664,
+    "kneeDepthMm": 115.81951984136234,
+    "calfDepthMm": 105.44275971768336,
+    "calfCircumferenceMm": 351.1149531208992,
+    "footLengthMm": 233.67341235280037,
+    "footBreadthMm": 92.46287494897842
+  },
+  "cuffs": {
+    "compressionMm": 1.3783036651313525,
+    "pressurePa": 4795.79443359375
+  },
+  "foot": {
+    "clothWidthMm": 94.41670402884483,
+    "skinWidthMm": 92.46287494897842,
+    "tipOverhangMm": 0.9820759296417236,
+    "triangleCenters": {
+      "samples": 16320,
+      "insideSkin": 0,
+      "minFieldMm": 0.30929541587829124,
+      "closestPointM": [
+        0.042302776128053665,
+        0.009279617729286352,
+        0.0881907045841217
+      ]
+    },
+    "ankleBend": {
+      "samples": 1860,
+      "reversedTriangles": 0
+    },
+    "instep": [
+      {
+        "zMm": 65,
+        "verticalGapMm": 1.127250265531371
+      },
+      {
+        "zMm": 85,
+        "verticalGapMm": 1.2369446864392772
+      },
+      {
+        "zMm": 100,
+        "verticalGapMm": 1.3425890575465074
+      },
+      {
+        "zMm": 115,
+        "verticalGapMm": 1.3757117055946955
+      }
+    ]
+  },
+  "positionsFinite": true,
+  "opacity": {
+    "thigh": 0.20980151360698185,
+    "ankle": 0.23610799286425277,
+    "tensionCorrelation": -0.43665403378759277
+  },
+  "runtime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "ankleWrinkles": {
+    "minMm": 0.4199999966658652,
+    "maxMm": 0.5699550383724272,
+    "samples": 18,
+    "crestArcsMm": [
+      318.375,
+      328.0227272727273,
+      335.25852272727275
+    ]
+  },
+  "ankleVariants": [
+    {
+      "ankles": 90,
+      "fit": {
+        "clothWidthMm": 94.41670402884483,
+        "skinWidthMm": 92.46287494897842,
+        "tipOverhangMm": 0.9820759296417236,
+        "triangleCenters": {
+          "samples": 16320,
+          "insideSkin": 0,
+          "minFieldMm": 0.2815616310528997,
+          "closestPointM": [
+            -0.0013475112694626052,
+            0.125176635881265,
+            -0.04207776114344597
+          ]
+        },
+        "ankleBend": {
+          "samples": 1861,
+          "reversedTriangles": 0
+        },
+        "instep": [
+          {
+            "zMm": 65,
+            "verticalGapMm": 1.127250265531371
+          },
+          {
+            "zMm": 85,
+            "verticalGapMm": 1.2369446864392772
+          },
+          {
+            "zMm": 100,
+            "verticalGapMm": 1.3425890575465074
+          },
+          {
+            "zMm": 115,
+            "verticalGapMm": 1.3757117055946955
+          }
+        ]
+      }
+    },
+    {
+      "ankles": 110,
+      "fit": {
+        "clothWidthMm": 94.41670402884483,
+        "skinWidthMm": 92.46287494897842,
+        "tipOverhangMm": 0.9820759296417236,
+        "triangleCenters": {
+          "samples": 16320,
+          "insideSkin": 0,
+          "minFieldMm": 0.30929541587829124,
+          "closestPointM": [
+            0.042302776128053665,
+            0.009279617729286352,
+            0.0881907045841217
+          ]
+        },
+        "ankleBend": {
+          "samples": 1859,
+          "reversedTriangles": 0
+        },
+        "instep": [
+          {
+            "zMm": 65,
+            "verticalGapMm": 1.127250265531371
+          },
+          {
+            "zMm": 85,
+            "verticalGapMm": 1.2369446864392772
+          },
+          {
+            "zMm": 100,
+            "verticalGapMm": 1.3425890575465074
+          },
+          {
+            "zMm": 115,
+            "verticalGapMm": 1.3757117055946955
+          }
+        ]
+      }
+    }
+  ],
+  "front": {
+    "fps": 5.2736435016992855,
+    "durationMs": 8533,
+    "medianMs": 183.39999999999418,
+    "p95Ms": 216.60000000000582,
+    "samples": 45,
+    "width": 1440,
+    "height": 1080
+  },
+  "macro": {
+    "fps": 3.1107209268565836,
+    "durationMs": 14466.099999999991,
+    "medianMs": 316.6000000000058,
+    "p95Ms": 366.59999999999127,
+    "samples": 45,
+    "width": 1440,
+    "height": 1080
+  },
+  "meshes": [
+    {
+      "id": "low",
+      "points": 9061,
+      "renderPoints": 9062,
+      "triangles": 17640,
+      "prepareMs": 63.1999999997206,
+      "medianMs": 4,
+      "p95Ms": 5,
+      "samples": 9,
+      "footFit": {
+        "clothWidthMm": 94.38404440879822,
+        "skinWidthMm": 92.46287494897842,
+        "tipOverhangMm": 0.9802728891372681,
+        "triangleCenters": {
+          "samples": 6400,
+          "insideSkin": 0,
+          "minFieldMm": 0.006560804333280261,
+          "closestPointM": [
+            0.04152453194061915,
+            0.0035964235042532287,
+            0.13303392132123312
+          ]
+        },
+        "ankleBend": {
+          "samples": 723,
+          "reversedTriangles": 0
+        },
+        "instep": [
+          {
+            "zMm": 65,
+            "verticalGapMm": 1.0825997554673727
+          },
+          {
+            "zMm": 85,
+            "verticalGapMm": 1.2278765906530709
+          },
+          {
+            "zMm": 100,
+            "verticalGapMm": 1.338435679730618
+          },
+          {
+            "zMm": 115,
+            "verticalGapMm": 1.3089721447451519
+          }
+        ]
+      }
+    },
+    {
+      "id": "standard",
+      "points": 22945,
+      "renderPoints": 22946,
+      "triangles": 45120,
+      "prepareMs": 142.5,
+      "medianMs": 8.100000000093132,
+      "p95Ms": 9.299999999813735,
+      "samples": 9,
+      "footFit": {
+        "clothWidthMm": 94.41670402884483,
+        "skinWidthMm": 92.46287494897842,
+        "tipOverhangMm": 0.9820759296417236,
+        "triangleCenters": {
+          "samples": 16320,
+          "insideSkin": 0,
+          "minFieldMm": 0.30929541587829124,
+          "closestPointM": [
+            0.042302776128053665,
+            0.009279617729286352,
+            0.0881907045841217
+          ]
+        },
+        "ankleBend": {
+          "samples": 1860,
+          "reversedTriangles": 0
+        },
+        "instep": [
+          {
+            "zMm": 65,
+            "verticalGapMm": 1.127250265531371
+          },
+          {
+            "zMm": 85,
+            "verticalGapMm": 1.2369446864392772
+          },
+          {
+            "zMm": 100,
+            "verticalGapMm": 1.3425890575465074
+          },
+          {
+            "zMm": 115,
+            "verticalGapMm": 1.3757117055946955
+          }
+        ]
+      }
+    },
+    {
+      "id": "high",
+      "points": 43165,
+      "renderPoints": 43166,
+      "triangles": 85272,
+      "prepareMs": 264.70000000018626,
+      "medianMs": 13.299999999813735,
+      "p95Ms": 14.700000000186265,
+      "samples": 9,
+      "footFit": {
+        "clothWidthMm": 94.3463034927845,
+        "skinWidthMm": 92.46287494897842,
+        "tipOverhangMm": 0.9820759296417236,
+        "triangleCenters": {
+          "samples": 30888,
+          "insideSkin": 0,
+          "minFieldMm": 0.13205468383293711,
+          "closestPointM": [
+            0.041921897480885185,
+            0.008652350554863611,
+            0.08895854900280635
+          ]
+        },
+        "ankleBend": {
+          "samples": 3488,
+          "reversedTriangles": 0
+        },
+        "instep": [
+          {
+            "zMm": 65,
+            "verticalGapMm": 1.1372499974225334
+          },
+          {
+            "zMm": 85,
+            "verticalGapMm": 1.2471154368297181
+          },
+          {
+            "zMm": 100,
+            "verticalGapMm": 1.3438111337518086
+          },
+          {
+            "zMm": 115,
+            "verticalGapMm": 1.3716989904979728
+          }
+        ]
+      }
+    }
+  ],
+  "runtimeAfterBenchmarks": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  }
+}

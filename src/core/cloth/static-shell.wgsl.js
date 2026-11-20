@@ -18,6 +18,7 @@ struct Controls {
   shell: vec4<f32>,
   elasticity: vec4<f32>,
   hardening: vec4<f32>,
+  fineWrinkles: vec4<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> source: array<PointInput>;
@@ -37,7 +38,7 @@ const foldPath = array<vec2<f32>, 9>(
 fn foldStrength(point: PointInput) -> f32 {
   let ease = max(0.0, 1.0 - point.contactMetric.y);
   let threshold = config.shell.z + 0.017 * max(0.0, point.contactMetric.x - 1.0);
-  return smoothstep(0.025, 0.12, ease - threshold) * point.contactMetric.z;
+  return smoothstep(0.025, 0.12, ease - threshold) * point.contactMetric.z * (1.0 - point.restProperties.w);
 }
 
 fn fitPoint(index: u32) -> vec4<f32> {
@@ -50,7 +51,14 @@ fn fitPoint(index: u32) -> vec4<f32> {
   let section = mix(foldPath[selectIndex], foldPath[selectIndex + 1u], smoothstep(0.0, 1.0, fraction));
   let slack = max(0.0, 1.0 - p.contactMetric.y - config.shell.z);
   let smallBuckle = 0.43 * extent / tau * sqrt(slack) * (0.5 - 0.5 * cos(cycle * tau));
-  let height = mix(smallBuckle * p.contactMetric.z, config.shell.w * section.y, amount);
+  let fineWeight = p.restProperties.w;
+  let finePitch = max(config.fineWrinkles.x, 3.5 * config.hardening.w);
+  let finePhase = tau * p.surfacePoint.w / finePitch + 0.75 * sin(p.surfaceNormal.w)
+    + 0.32 * sin(3.0 * p.surfaceNormal.w + 0.31 * tau * p.surfacePoint.w / finePitch);
+  let fineHeight = config.fineWrinkles.y * smoothstep(0.0, 0.085, slack)
+    * (0.5 - 0.5 * cos(finePhase)) * fineWeight;
+  let height = mix(smallBuckle * p.contactMetric.z * (1.0 - fineWeight), config.shell.w * section.y, amount)
+    + fineHeight;
   let gap = config.shell.x + min(config.shell.w, height);
   let stride = config.mesh.y;
   let row = index / stride;

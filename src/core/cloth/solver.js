@@ -25,13 +25,14 @@ export async function createStaticShellSolver(device) {
     const { columns, rows } = input;
     const points = (columns + 1) * (rows + 1);
     const resultBytes = points * 64;
-    const controls = new ArrayBuffer(64);
+    const controls = new ArrayBuffer(80);
     new Uint32Array(controls).set([points, columns + 1, rows, 0]);
     new Float32Array(controls).set([
       settings.radialClearanceM, settings.wrinklingWavelengthM,
       settings.compressionThreshold, settings.maxWrinkleAmplitudeM,
       settings.poisson, settings.hoopModulusNpm, settings.axialModulusNpm, 0,
-      settings.hoopHardening, settings.axialHardening, settings.selfClearanceM, input.arcs.at(-1) / rows
+      settings.hoopHardening, settings.axialHardening, settings.selfClearanceM, input.arcs.at(-1) / rows,
+      settings.fineWrinkleWavelengthM ?? 0, settings.fineWrinkleAmplitudeM ?? 0, 0, 0
     ], 4);
 
     const buffers = [];
@@ -46,7 +47,7 @@ export async function createStaticShellSolver(device) {
       const displaced = make(points * 16, GPUBufferUsage.STORAGE);
       const alternative = make(points * 16, GPUBufferUsage.STORAGE);
       const output = make(resultBytes, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
-      const uniform = make(64, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+      const uniform = make(controls.byteLength, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
       const readback = make(resultBytes, GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST);
       device.queue.writeBuffer(geometry, 0, input.input);
       device.queue.writeBuffer(uniform, 0, controls);
