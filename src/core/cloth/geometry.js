@@ -7,14 +7,16 @@ export function createClothGeometry(frame) {
   const coordinates = new Float32Array((points + 1) * 2);
   const fields = new Float32Array((points + 1) * 4);
   const details = new Float32Array((points + 1) * 4);
+  const selfContact = new Float32Array(points + 1);
   const indices = surfaceIndices(columns, rows);
   coordinates.set(materialCoordsM);
 
   for (let node = 0; node < points; node++) {
-    const pos = node * 12;
+    const pos = node * 16;
     positions.set(state.subarray(pos, pos + 3), 3 * node);
     fields.set(state.subarray(pos + 4, pos + 8), 4 * node);
     details.set(state.subarray(pos + 8, pos + 12), 4 * node);
+    selfContact[node] = state[pos + 12];
   }
 
   for (let column = 0; column < columns; column++) {
@@ -34,6 +36,7 @@ export function createClothGeometry(frame) {
   geometry.setAttribute('materialUV', new BufferAttribute(coordinates, 2));
   geometry.setAttribute('clothFields', new BufferAttribute(fields, 4));
   geometry.setAttribute('clothDetails', new BufferAttribute(details, 4));
+  geometry.setAttribute('selfContact', new BufferAttribute(selfContact, 1));
   geometry.computeVertexNormals();
   const normals = geometry.getAttribute('normal');
   for (let row = 0; row <= rows; row++) {
@@ -53,8 +56,8 @@ export function sampleCloth(frame, surface, arc, angle) {
   const row = Math.max(0, Math.min(frame.rows, Math.round(arc / frame.arcs.at(-1) * frame.rows)));
   const tau = 2 * Math.PI;
   const col = Math.round((((angle % tau) + tau) % tau) / tau * frame.columns) % frame.columns;
-  const offset = (row * (frame.columns + 1) + col) * 12;
-  const data = frame.state.subarray(offset, offset + 12);
+  const offset = (row * (frame.columns + 1) + col) * 16;
+  const data = frame.state.subarray(offset, offset + 16);
   return {
     position: Array.from(data.subarray(0, 3)),
     normal: surface.normal(frame.arcs[row], tau * col / frame.columns),
@@ -65,6 +68,8 @@ export function sampleCloth(frame, surface, arc, angle) {
     tensionAxialNpm: data[7],
     pressurePa: data[9],
     reinforcement: data[10],
-    restRadiusM: data[11]
+    restRadiusM: data[11],
+    selfContactCorrectionMm: data[12] * 1000,
+    foldAmount: data[13]
   };
 }

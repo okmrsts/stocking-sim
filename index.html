@@ -41,6 +41,8 @@
         <button type="button" data-view="ankle-wrinkles" aria-pressed="false">シワ</button>
         <button type="button" data-view="thigh" aria-pressed="false">太もも</button>
         <button type="button" data-view="thigh-macro" aria-pressed="false">極限マクロ</button>
+        <button type="button" data-view="foot" aria-pressed="false">足部</button>
+        <button type="button" id="bare-foot" aria-pressed="false">素足</button>
         <button type="button" id="settings-open">確かめる</button>
       </nav>
       <div class="subviews" id="subviews" aria-label="観察箇所" hidden></div>
@@ -60,7 +62,7 @@
         <option value="0">着用状態</option><option value="1">張力</option>
         <option value="2">周方向の伸び</option><option value="3">肌との隙間</option>
         <option value="4">不透明度</option><option value="5">濡れ（0%）</option>
-        <option value="6">接触圧</option>
+        <option value="6">接触圧</option><option value="7">布どうしの接触</option>
       </select>
       <button type="button" id="benchmark">解像度別の布計算を測る</button>
       <p class="measurement" id="benchmark-result" aria-live="polite"></p>

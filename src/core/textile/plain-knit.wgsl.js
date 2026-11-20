@@ -1,7 +1,7 @@
 export const fabricShader = /* wgsl */ `
-fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>,
+fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>, contactM: f32,
   worldNormal: vec3<f32>, eye: vec3<f32>, pitch: vec2<f32>, data: vec4<f32>,
-  tint: vec3<f32>, mode: f32, maxima: vec3<f32>) -> vec4<f32> {
+  tint: vec3<f32>, mode: f32, maxima: vec4<f32>) -> vec4<f32> {
   let normalDir = normalize(worldNormal);
   let viewDir = normalize(eye);
   let facing = max(0.11, abs(dot(normalDir, viewDir)));
@@ -59,6 +59,7 @@ fn shadePlainKnit(materialUV: vec2<f32>, fields: vec4<f32>, cloth: vec4<f32>,
     if (mode > 3.5) { scalar = coarseOpacity; }
     if (mode > 4.5) { scalar = 0.0; }
     if (mode > 5.5) { scalar = cloth.y / 5000.0; }
+    if (mode > 6.5) { scalar = contactM * 1000.0 / maxima.w; }
     value = heatRamp(scalar) * (0.81 + 0.19 * diffuse);
     filtered = 1.0;
   }

@@ -4,14 +4,12 @@ import {
 } from 'three/webgpu';
 import { uv, wgslFn } from 'three/tsl';
 
-export function createStudio(config, bodyGeometry, clothGeometry, clothMaterial) {
+export function createStudio(config, bodyParts, clothGeometry, clothMaterial) {
   const scene = new Scene();
   scene.background = new Color(config.background);
 
-  const body = new Mesh(bodyGeometry, new MeshStandardMaterial({
-    color: config.skin, roughness: 0.74, metalness: 0.0
-  }));
-  scene.add(body);
+  const skin = new MeshStandardMaterial({ color: config.skin, roughness: 0.74, metalness: 0.0 });
+  for (const geometry of bodyParts) scene.add(new Mesh(geometry, skin));
 
   const textile = new Mesh(clothGeometry, clothMaterial);
   textile.renderOrder = 2;

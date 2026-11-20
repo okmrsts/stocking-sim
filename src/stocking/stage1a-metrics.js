@@ -2,8 +2,8 @@ import { sampleCloth } from '../core/cloth/geometry.js';
 import { normalOpacity } from '../core/textile/material.js';
 
 const sampleSites = [
-  ['thigh', 0.799, 0.31], ['ankle', 0.253, 0.31], ['cuff', 0.877, 0.20],
-  ['toe', 0.031, 0.12], ['kneeFront', 0.626, 0.0], ['kneeBack', 0.626, Math.PI]
+  ['thigh', 0.772, 0.31], ['ankle', 0.358, 0.31], ['cuff', 0.844, 0.20],
+  ['toe', 0.031, 0.12], ['kneeFront', 0.617, 0.0], ['kneeBack', 0.617, Math.PI]
 ];
 
 export function collectFitMetrics(frame, surface, optics, radiusM) {
@@ -17,9 +17,26 @@ export function collectFitMetrics(frame, surface, optics, radiusM) {
     return { minMm: Math.min(...values), maxMm: Math.max(...values), samples: values.length };
   }
   const relation = [];
+  let contactPoints = 0, maxCorrectionMm = 0, reversedPoints = 0;
+  let footPoints = 0, footInsideSkin = 0, minFootFieldMm = Infinity, closestFootPointM;
   for (let index = 0; index < frame.points; index++) {
-    const base = index * 12;
+    if (index % (frame.columns + 1) === frame.columns) continue;
+    const base = index * 16;
+    const contactMm = frame.state[base + 12] * 1000;
+    if (contactMm > 0.001) contactPoints++;
+    reversedPoints += frame.state[base + 14];
+    maxCorrectionMm = Math.max(maxCorrectionMm, contactMm);
     const arc = frame.arcs[Math.floor(index / (frame.columns + 1))];
+    const [x, y, z] = frame.state.subarray(base, base + 3);
+    if (arc < 0.30 && y <= surface.footLimitM) {
+      const distance = surface.footDistance(x, y, z) * 1000;
+      footPoints++;
+      if (distance < -0.1) footInsideSkin++;
+      if (distance < minFootFieldMm) {
+        minFootFieldMm = distance;
+        closestFootPointM = [x, y, z];
+      }
+    }
     const reinforcement = frame.state[base + 10];
     if (arc < 0.22 || reinforcement > 1.001) continue;
     const state = {
@@ -40,7 +57,8 @@ export function collectFitMetrics(frame, surface, optics, radiusM) {
   }
   const tensionOpacity = { samples: relation.length, pearson: xy / Math.sqrt(xx * yy) };
   return {
-    samples, tensionOpacity, yarnDiameterMicrometers: radiusM * 2e6,
-    gaps: { ankleFront: gapRange(0.255, 0.018, 0.31), kneeRear: gapRange(0.631, 0.019, Math.PI) }
+    samples, tensionOpacity, selfContact: { contactPoints, maxCorrectionMm, reversedPoints },
+    footContact: { footPoints, footInsideSkin, minFootFieldMm, closestFootPointM }, yarnDiameterMicrometers: radiusM * 2e6,
+    gaps: { ankleFront: gapRange(0.324, 0.022, 0.31), kneeRear: gapRange(0.622, 0.021, Math.PI) }
   };
 }

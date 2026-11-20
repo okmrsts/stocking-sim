@@ -3,7 +3,7 @@ function limitedSlope(before, after) {
   return 2 * before * after / (before + after);
 }
 
-function interpolate(profile, arc) {
+export function interpolate(profile, arc) {
   let index = 0;
   while (index < profile.length - 2 && arc > profile[index + 1][0]) index++;
   const left = profile[index];
@@ -42,7 +42,7 @@ export function createSweptSurface(profile, contour = () => 1) {
     return normalize(cross(dc, ds));
   }
 
-  return { point, normal, length: profile.at(-1)[0] };
+  return { point, normal, section, length: profile.at(-1)[0] };
 }
 
 export function difference(a, b) {

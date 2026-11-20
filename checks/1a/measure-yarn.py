@@ -2,14 +2,17 @@
 
 import json
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-folder = Path(__file__).resolve().parent
-views = json.loads((folder.parent / "views-1a.json").read_text())
+baseline = Path(__file__).resolve().parent
+folder = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else baseline.parent / "1a-revision"
+views_file = "views-1a.json" if folder == baseline else "views-1a-revision.json"
+views = json.loads((baseline.parent / views_file).read_text())
 height = views["viewport"]["height"]
 result = {}
 

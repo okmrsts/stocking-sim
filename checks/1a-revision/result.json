@@ -1,0 +1,269 @@
+{
+  "browser": "151.0.7922.34",
+  "platform": "linux x64",
+  "viewport": {
+    "width": 1440,
+    "height": 1080
+  },
+  "deviceScaleFactor": 1,
+  "chromeArgs": [
+    "--enable-unsafe-webgpu",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader",
+    "--enable-features=Vulkan,SkiaGraphite,DawnUseSwiftShader",
+    "--use-vulkan=swiftshader",
+    "--disable-vulkan-surface"
+  ],
+  "cdn": "cached-jsdelivr-response",
+  "mobileLayout": {
+    "overflows": false,
+    "closed": true,
+    "selectedView": "極限マクロ · 足首",
+    "displayedMode": "7"
+  },
+  "footControls": {
+    "bare": true,
+    "label": "かかと",
+    "disabled": true
+  },
+  "pageErrors": [],
+  "runtime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "yarnDiameterMicrometers": 59.54528205231674,
+  "samples": {
+    "thigh": {
+      "position": [
+        0.020591573789715767,
+        0.6038980484008789,
+        0.060707516968250275
+      ],
+      "normal": [
+        0.2622072862318941,
+        -0.0723405306119532,
+        0.9622963091884362
+      ],
+      "gapMm": 0.6000000284984708,
+      "stretchHoop": 2.630126714706421,
+      "stretchAxial": 1.0111960172653198,
+      "tensionHoopNpm": 121.78266143798828,
+      "tensionAxialNpm": 2.509159564971924,
+      "pressurePa": 1741.2242431640625,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.22000471665634436
+    },
+    "ankle": {
+      "position": [
+        0.010965731926262379,
+        0.18617434799671173,
+        0.024989603087306023
+      ],
+      "normal": [
+        0.2827508778396151,
+        -0.16713382658536505,
+        0.9445201030639104
+      ],
+      "gapMm": 0.6802532589063048,
+      "stretchHoop": 1.392063021659851,
+      "stretchAxial": 1.055525779724121,
+      "tensionHoopNpm": 9.948686599731445,
+      "tensionAxialNpm": 1.5563172101974487,
+      "pressurePa": 261.2074279785156,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0.1854742020368576,
+      "normalOpacity": 0.24305364281595254
+    },
+    "cuff": {
+      "position": [
+        0.02430872432887554,
+        0.67709881067276,
+        0.06535568088293076
+      ],
+      "normal": [
+        0.1778813525371021,
+        -0.06472783439266058,
+        0.9819208378858285
+      ],
+      "gapMm": 0.6000000284984708,
+      "stretchHoop": 3.093951940536499,
+      "stretchAxial": 1.012871265411377,
+      "tensionHoopNpm": 353.5980529785156,
+      "tensionAxialNpm": 5.082887172698975,
+      "pressurePa": 4292.86767578125,
+      "reinforcement": 2.1500000953674316,
+      "restRadiusM": 0.026799999177455902,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.39415305643519105
+    },
+    "toe": {
+      "position": [
+        -0.004424093756824732,
+        0.035212986171245575,
+        0.15577632188796997
+      ],
+      "normal": [
+        0.0197863090545615,
+        0.9951853696750829,
+        0.09599261408393005
+      ],
+      "gapMm": 0.6000000284984708,
+      "stretchHoop": 1.8404252529144287,
+      "stretchAxial": 1.1590007543563843,
+      "tensionHoopNpm": 37.83528518676758,
+      "tensionAxialNpm": 5.4767656326293945,
+      "pressurePa": 981.4503784179688,
+      "reinforcement": 1.9500000476837158,
+      "restRadiusM": 0.020999999716877937,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.3873609651300224
+    },
+    "kneeFront": {
+      "position": [
+        0.0005677866865880787,
+        0.4402182996273041,
+        0.05873774364590645
+      ],
+      "normal": [
+        -0.014441316087287008,
+        -0.26048740603607423,
+        0.9653692348973343
+      ],
+      "gapMm": 0.7653762586414814,
+      "stretchHoop": 2.0345611572265625,
+      "stretchAxial": 0.966098964214325,
+      "tensionHoopNpm": 44.467857360839844,
+      "tensionAxialNpm": 0.7901920676231384,
+      "pressurePa": 574.385009765625,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.23571874286509897
+    },
+    "kneeBack": {
+      "position": [
+        0.0009043660247698426,
+        0.4503691494464874,
+        -0.039102304726839066
+      ],
+      "normal": [
+        0.015442987991031032,
+        0.2187135472800915,
+        -0.9756668992838018
+      ],
+      "gapMm": 2.1232222206890583,
+      "stretchHoop": 1.9375890493392944,
+      "stretchAxial": 1.0386974811553955,
+      "tensionHoopNpm": 37.16217803955078,
+      "tensionAxialNpm": 2.0206029415130615,
+      "pressurePa": 0,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 1,
+      "normalOpacity": 0.2271622088988745
+    }
+  },
+  "gaps": {
+    "ankleFront": {
+      "minMm": 0.6104673957452178,
+      "maxMm": 2.1316357888281345,
+      "samples": 18
+    },
+    "kneeRear": {
+      "minMm": 0.6000000284984708,
+      "maxMm": 2.129449276253581,
+      "samples": 17
+    }
+  },
+  "selfContact": {
+    "contactPoints": 128,
+    "maxCorrectionMm": 1.3445131480693817,
+    "reversedPoints": 417
+  },
+  "footContact": {
+    "footPoints": 8000,
+    "footInsideSkin": 0,
+    "minFootFieldMm": 0.3620045385581787,
+    "closestFootPointM": [
+      0.041388336569070816,
+      0.002463651355355978,
+      0.1337810754776001
+    ]
+  },
+  "tensionOpacity": {
+    "samples": 15808,
+    "pearson": -0.2794196493702961
+  },
+  "initial": {
+    "points": 22945,
+    "triangles": 45120,
+    "prepareMs": 155.09999999962747,
+    "medianMs": 10.699999999254942,
+    "p95Ms": 13.900000000372529,
+    "samples": 7
+  },
+  "front": {
+    "fps": 10.465481354000715,
+    "durationMs": 8599.700000000004,
+    "medianMs": 100,
+    "p95Ms": 100.10000000000582,
+    "samples": 90,
+    "width": 1440,
+    "height": 1080
+  },
+  "macro": {
+    "fps": 4.0756254953017095,
+    "durationMs": 22082.5,
+    "medianMs": 249.89999999999418,
+    "p95Ms": 266.6999999999971,
+    "samples": 90,
+    "width": 1440,
+    "height": 1080
+  },
+  "meshes": [
+    {
+      "id": "low",
+      "points": 9061,
+      "renderPoints": 9062,
+      "triangles": 17640,
+      "prepareMs": 57.79999999888241,
+      "medianMs": 4.800000000745058,
+      "p95Ms": 5.300000000745058,
+      "samples": 15
+    },
+    {
+      "id": "standard",
+      "points": 22945,
+      "renderPoints": 22946,
+      "triangles": 45120,
+      "prepareMs": 141,
+      "medianMs": 9.099999999627471,
+      "p95Ms": 12.799999998882413,
+      "samples": 15
+    },
+    {
+      "id": "high",
+      "points": 43165,
+      "renderPoints": 43166,
+      "triangles": 85272,
+      "prepareMs": 223.10000000149012,
+      "medianMs": 15.700000001117587,
+      "p95Ms": 20,
+      "samples": 15
+    }
+  ]
+}

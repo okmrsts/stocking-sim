@@ -1,34 +1,45 @@
 import { BufferGeometry, Float32BufferAttribute } from 'three/webgpu';
 import { surfaceIndices } from '../geometry/grid.js';
 import { createSweptSurface } from './swept-surface.js';
+import { createFootField } from './foot-field.js';
+import { createImplicitMesh } from './implicit-mesh.js';
+import { withFootEnvelope } from './foot-contact-surface.js';
 
 const gaussian = (value, center, width) => Math.exp(-Math.pow((value - center) / width, 2));
 
-export function createLeg(profile) {
-  return createSweptSurface(profile, (arc, angle) => {
-    const ankleBone = 0.093 * gaussian(arc, 0.24, 0.018) * Math.pow(Math.sin(angle), 6);
-    const calf = 0.056 * gaussian(arc, 0.46, 0.087) * Math.sin(2 * angle);
-    const knee = 0.062 * gaussian(arc, 0.635, 0.030) * Math.pow(Math.max(0, Math.cos(angle)), 5);
-    const arch = -0.14 * gaussian(arc, 0.111, 0.033) * Math.pow(Math.max(0, -Math.cos(angle)), 3)
-      * (0.60 + 0.40 * Math.sin(angle));
-    return 1 + ankleBone + calf + knee + arch;
+export function createLeg(profile, anatomy) {
+  const skinSurface = createSweptSurface(profile, (arc, angle) => {
+    const ankleBone = 0.093 * gaussian(arc, 0.273 + 0.008 * Math.sin(angle), 0.022) * Math.pow(Math.sin(angle), 6);
+    const calf = 0.056 * gaussian(arc, 0.48, 0.10) * Math.sin(2 * angle);
+    const knee = 0.062 * gaussian(arc, 0.626, 0.035) * Math.pow(Math.max(0, Math.cos(angle)), 5);
+    const shin = 0.031 * gaussian(arc, 0.455, 0.13) * Math.pow(Math.max(0, Math.cos(angle)), 10);
+    return 1 + ankleBone + calf + knee + shin;
   });
+  const foot = createFootField(anatomy, skinSurface);
+  const surface = withFootEnvelope(skinSurface, foot, anatomy);
+  surface.footDistance = foot.sample;
+  surface.footLimitM = foot.limit;
+  surface.skinParts = () => [
+    createLegGeometry(skinSurface, anatomy.skinJoinM - 0.0012),
+    createImplicitMesh(foot.sample, [-0.061,-0.004,-0.063], [0.061,foot.limit,0.185], anatomy.skinGridM)
+  ];
+  return surface;
 }
 
-export function createLegGeometry(surface, columns = 84, rows = 264) {
+function createLegGeometry(surface, lowerArc, columns = 72, rows = 214) {
   const positions = [];
   const normals = [];
   const indices = surfaceIndices(columns, rows);
   for (let row = 0; row <= rows; row++) {
     for (let column = 0; column <= columns; column++) {
-      const arc = surface.length * row / rows;
+      const arc = lowerArc + (surface.length - lowerArc) * row / rows;
       const angle = 2 * Math.PI * column / columns;
       positions.push(...surface.point(arc, angle));
       normals.push(...surface.normal(arc, angle));
     }
   }
-  // Small flat end faces use the same perimeter and an averaged center.
-  for (const row of [0, rows]) {
+  // The thigh cap closes the upper transverse cut. The foot joins the other rim.
+  for (const row of [rows]) {
     const offset = row * (columns + 1);
     const centerId = positions.length / 3;
     const center = [0, 0, 0];

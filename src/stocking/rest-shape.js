@@ -13,8 +13,8 @@ export function createKneeHighInput(surface, garment, level) {
   const sampleStrideM = garment.topM / rows;
   const relaxedArc = new Float32Array(rows + 1);
   const arcs = Array.from({ length: rows + 1 }, (_, row) => row * sampleStrideM);
-  const ease = arc => garment.axialEase + 0.034 * gaussian(arc, 0.272, 0.031)
-    + 0.030 * gaussian(arc, 0.635, 0.037);
+  const ease = arc => garment.axialEase + 0.155 * gaussian(arc, 0.320, 0.035)
+    + 0.143 * gaussian(arc, 0.621, 0.035);
 
   for (let row = 0; row <= rows; row++) {
     const arc = arcs[row];
@@ -40,7 +40,7 @@ export function createKneeHighInput(surface, garment, level) {
       const lo = Math.max(0, arc - 0.0006);
       const hi = arc + 0.0006;
       const ds = distance(surface.point(hi, theta), surface.point(lo, theta)) / (hi - lo);
-      const hem = smoothstep(arc, 0.154, 0.231) * (1 - smoothstep(arc, garment.topM - garment.cuffWidthM - 0.009, garment.topM));
+      const hem = smoothstep(arc, 0.251, 0.295) * (1 - smoothstep(arc, garment.topM - garment.cuffWidthM - 0.009, garment.topM));
       input.set([
         ...pos, arc, ...normal, theta,
         dc / unloadedRadius, ds / ease(arc), hem, reinforcement,

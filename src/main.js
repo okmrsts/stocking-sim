@@ -1,12 +1,12 @@
 import { NeutralToneMapping, SRGBColorSpace } from 'three/webgpu';
-import { createLeg, createLegGeometry } from './core/body/leg-model.js';
+import { createLeg } from './core/body/leg-model.js';
 import { createClothGeometry, sampleCloth } from './core/cloth/geometry.js';
 import { createStaticShellSolver } from './core/cloth/solver.js';
 import { createGpuContext, withGpuValidation } from './core/gpu/context.js';
 import { createTextileMaterial } from './core/textile/material.js';
 import { measureFrames, summarize } from './core/ui/metrics.js';
 import { connectOrbit } from './core/ui/pointer-router.js';
-import { bodyProfile, diagnostics, material, meshLevels, preset, renderConfig } from './config/stage1a.js';
+import { bodyProfile, footAnatomy, diagnostics, material, meshLevels, preset, renderConfig } from './config/stage1a.js';
 import { createKneeHighInput } from './stocking/rest-shape.js';
 import { createStudio } from './stocking/scene.js';
 import { createStageCamera } from './stocking/stage-camera.js';
@@ -14,11 +14,12 @@ import { collectFitMetrics } from './stocking/stage1a-metrics.js';
 
 const query = new URLSearchParams(location.search);
 const format = new Intl.NumberFormat('ja-JP');
-const modeLabels = ['', '張力', '周方向の伸び', '肌との隙間', '不透明度', '濡れ', '接触圧'];
+const modeLabels = ['', '張力', '周方向の伸び', '肌との隙間', '不透明度', '濡れ', '接触圧', '布どうしの接触'];
 const legends = [
   '', '0 — ' + diagnostics.tensionNpmMax + ' N/m（縦横の大きい値）',
   '0 — ' + Math.round(diagnostics.strainMax * 100) + '%', '0 — ' + diagnostics.gapMmMax + ' mm',
-  '0 — 100%（表示角度を含む）', '0 — 100%（段階1aは常に乾燥）', '0 — 5 kPa（推定）'
+  '0 — 100%（表示角度を含む）', '0 — 100%（段階1aは常に乾燥）', '0 — 5 kPa（推定）',
+  '接触による外向き補正 0 — ' + diagnostics.selfContactMmMax + ' mm'
 ];
 
 
@@ -54,10 +55,10 @@ export async function start() {
   renderer.toneMapping = NeutralToneMapping;
   renderer.toneMappingExposure = 0.84;
 
-  const response = await fetch(new URL('../checks/views-1a.json', import.meta.url));
+  const response = await fetch(new URL('../checks/views-1a-revision.json', import.meta.url));
   if (!response.ok) throw new Error('視点の設定を読み込めません。');
   const { views, defaultView } = await response.json();
-  const surface = createLeg(bodyProfile);
+  const surface = createLeg(bodyProfile, footAnatomy);
   const solve = await withGpuValidation(device, reportError, () => createStaticShellSolver(device));
   const standard = meshLevels.find(level => level.id === 'standard');
   const measureSolve = async (level, repeats) => {
@@ -78,7 +79,7 @@ export async function start() {
   };
   const cloth = createTextileMaterial(optics, diagnostics);
   const geometry = createClothGeometry(frame);
-  const { scene, textile } = createStudio(renderConfig, createLegGeometry(surface), geometry, cloth.material);
+  const { scene, textile } = createStudio(renderConfig, surface.skinParts(), geometry, cloth.material);
   const { camera, setView: positionCamera, rotate, zoom } = createStageCamera(views, anchor => {
     const sample = sampleCloth(frame, surface, anchor.arcM, anchor.angleRad);
     return {
@@ -151,10 +152,22 @@ export async function start() {
     cloth.mode.value = mode;
     viewMode.value = String(mode);
     const legend = document.getElementById('legend');
-    legend.hidden = mode === 0;
+    legend.hidden = mode === 0 || !textile.visible;
     document.getElementById('legend-text').textContent = modeLabels[mode] + '  ' + legends[mode];
     requestDraw();
   }
+
+  const barefootButton = document.getElementById('bare-foot');
+  function setBarefoot(barefoot) {
+    textile.visible = !barefoot;
+    barefootButton.setAttribute('aria-pressed', String(barefoot));
+    viewMode.disabled = barefoot || measuring;
+    document.getElementById('legend').hidden = barefoot || cloth.mode.value === 0;
+    requestDraw();
+  }
+  barefootButton.addEventListener('click', () => {
+    if (!measuring) setBarefoot(textile.visible);
+  });
 
   function resize() {
     const { clientWidth: width, clientHeight: height } = canvas;
@@ -230,7 +243,9 @@ export async function start() {
     output.textContent = '計測中…';
     const restoreView = currentView;
     const restoreDisplay = cloth.mode.value;
+    const restoreBarefoot = !textile.visible;
     try {
+      setBarefoot(false);
       setDisplay(0);
       const front = await profileView('front', 72);
       const closeup = await profileView('thigh-macro', 72);
@@ -251,6 +266,7 @@ export async function start() {
       viewMode.disabled = false;
       setView(restoreView);
       setDisplay(restoreDisplay);
+      setBarefoot(restoreBarefoot);
     }
   });
 
@@ -262,7 +278,8 @@ export async function start() {
 
   setView(views[query.get('view')] ? query.get('view') : defaultView);
   const initialMode = Number(query.get('display') || 0);
-  setDisplay(Number.isInteger(initialMode) && initialMode >= 0 && initialMode <= 6 ? initialMode : 0);
+  setBarefoot(query.get('barefoot') === '1');
+  setDisplay(Number.isInteger(initialMode) && initialMode >= 0 && initialMode <= 7 ? initialMode : 0);
   resize();
   await withGpuValidation(device, reportError, async () => {
     draw();
@@ -276,7 +293,7 @@ export async function start() {
 
   if (query.has('capture')) {
     window.stockingStage1a = {
-      result, setView, setDisplay, profileView, meshBenchmarks,
+      result, setView, setDisplay, setBarefoot, profileView, meshBenchmarks,
       ...collectFitMetrics(frame, surface, optics, cloth.radiusM),
       initial: { points: frame.points, triangles: frame.triangles, prepareMs: initial.prepareMs, ...summarize(frame.elapsedMs) }
     };
