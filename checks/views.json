@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "viewport": { "width": 1440, "height": 1080, "deviceScaleFactor": 1 },
+  "scene": {
+    "bodyPreset": "neutral-adult-standing",
+    "garmentPreset": "plain-20d-pantyhose",
+    "colorSrgb": "#38313a",
+    "seed": 21347,
+    "backgroundSrgb": "#e9e8e6",
+    "lighting": {
+      "ambientIntensity": 0.6,
+      "keyPositionM": [-1.2, 1.6, 1.4],
+      "keyIntensity": 2.5,
+      "fillPositionM": [1.5, 0.9, 0.6],
+      "fillIntensity": 0.6
+    }
+  },
+  "cameras": {
+    "front": [{ "positionM": [0, 0.55, 1.8], "targetM": [0, 0.55, 0], "fovDeg": 36, "nearM": 0.02, "farM": 8 }],
+    "oblique": [{ "positionM": [0.92, 0.55, 1.55], "targetM": [0, 0.55, 0], "fovDeg": 36, "nearM": 0.02, "farM": 8 }],
+    "wrinkles": [
+      { "id": "ankle", "positionM": [0.24, 0.13, -0.25], "targetM": [0.11, 0.13, -0.02], "fovDeg": 26, "nearM": 0.01, "farM": 4 },
+      { "id": "back-of-knee", "positionM": [0.24, 0.51, -0.27], "targetM": [0.11, 0.51, -0.04], "fovDeg": 26, "nearM": 0.01, "farM": 4 }
+    ],
+    "thigh": [{ "positionM": [0.11, 0.73, 0.29], "targetM": [0.11, 0.73, 0.07], "fovDeg": 20, "nearM": 0.01, "farM": 4 }],
+    "extreme-macro": [
+      { "id": "thigh", "anchor": "thigh-front", "offsetM": [0, 0, 0.012], "fovDeg": 8, "nearM": 0.0003, "farM": 0.25 },
+      { "id": "ankle", "anchor": "ankle-front", "offsetM": [0, 0, 0.012], "fovDeg": 8, "nearM": 0.0003, "farM": 0.25 }
+    ]
+  }
+}

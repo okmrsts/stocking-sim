@@ -1,0 +1,29 @@
+{
+  "browser": "151.0.7922.34",
+  "platform": "linux x64",
+  "viewport": {
+    "width": 1000,
+    "height": 700
+  },
+  "deviceScaleFactor": 1,
+  "chromeArgs": [
+    "--enable-unsafe-webgpu",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader",
+    "--enable-features=Vulkan,SkiaGraphite,DawnUseSwiftShader",
+    "--use-vulkan=swiftshader",
+    "--disable-vulkan-surface"
+  ],
+  "cdn": "cached-jsdelivr-response",
+  "state": "ready",
+  "backend": "WebGPU",
+  "revision": "185",
+  "fps": 58.06638923836252,
+  "validationErrors": 0,
+  "errors": [],
+  "adapter": {
+    "vendor": "google",
+    "architecture": "swiftshader",
+    "isFallbackAdapter": true
+  }
+}
