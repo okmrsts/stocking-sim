@@ -1,5 +1,7 @@
 import { NeutralToneMapping, SRGBColorSpace } from 'three/webgpu';
 import { createLeg } from './core/body/leg-model.js';
+import { createLowerBodyGeometry } from './core/body/lower-body.js';
+import { updateTissueField, wrapCompliantSurface } from './core/body/soft-tissue.js';
 import { createClothGeometry, sampleCloth } from './core/cloth/geometry.js';
 import { createStaticShellSolver } from './core/cloth/solver.js';
 import { createGpuContext, withGpuValidation } from './core/gpu/context.js';
@@ -7,7 +9,7 @@ import { createTextileMaterial } from './core/textile/material.js';
 import { measureFrames, summarize } from './core/ui/metrics.js';
 import { connectOrbit } from './core/ui/pointer-router.js';
 import {
-  bodyProfile, comparisonConfig, footAnatomy, diagnostics, material, meshLevels, preset, renderConfig
+  bodyProfile, comparisonConfig, footAnatomy, diagnostics, lowerBodyConfig, material, meshLevels, preset, renderConfig, tissue
 } from './config/stage1a.js';
 import { createKneeHighInput } from './stocking/rest-shape.js';
 import { createUnloadedGeometry } from './stocking/unloaded-preview.js';
@@ -61,10 +63,11 @@ export async function start() {
   renderer.toneMapping = NeutralToneMapping;
   renderer.toneMappingExposure = 0.84;
 
-  const response = await fetch(new URL('../checks/views-1a-revision.json', import.meta.url));
+  const response = await fetch(new URL('../checks/views-1a-bilateral.json', import.meta.url));
   if (!response.ok) throw new Error('視点の設定を読み込めません。');
   const { views, defaultView } = await response.json();
-  const surface = createLeg(bodyProfile, footAnatomy);
+  const bareLeg = createLeg(bodyProfile, footAnatomy);
+  let surface = bareLeg, tissueField;
   const solve = await withGpuValidation(device, reportError, () => createStaticShellSolver(device));
   const standard = meshLevels.find(level => level.id === 'standard');
   const measureSolve = async (level, repeats) => {
@@ -74,6 +77,11 @@ export async function start() {
     const fitted = await withGpuValidation(device, reportError, () => solve(input, material, repeats));
     return { fitted, prepareMs };
   };
+  for (let pass = 0; pass < tissue.passes; pass++) {
+    const { fitted } = await measureSolve(standard, 0);
+    tissueField = updateTissueField(fitted, tissue, tissueField);
+    surface = wrapCompliantSurface(bareLeg, tissueField);
+  }
   const initial = await measureSolve(standard, 7);
   const frame = initial.fitted;
   const optics = {
@@ -86,13 +94,22 @@ export async function start() {
   const cloth = createTextileMaterial(optics, diagnostics);
   const geometry = createClothGeometry(frame);
   const unloadedGeometry = createUnloadedGeometry(frame);
-  const bodyParts = surface.skinParts();
-  const { scene, textile, unloaded } = createStudio(renderConfig, bodyParts, geometry, unloadedGeometry, cloth.material);
+  const foot = bareLeg.createFootGeometry();
+  const skinStart = footAnatomy.skinJoinM - 0.0012;
+  const body = {
+    foot, halfStanceM: lowerBodyConfig.halfStanceM,
+    bare: createLowerBodyGeometry(bareLeg.skinSurface, skinStart, lowerBodyConfig),
+    loaded: createLowerBodyGeometry(wrapCompliantSurface(bareLeg.skinSurface, tissueField), skinStart, lowerBodyConfig)
+  };
+  const { scene, textile, unloaded, setSkinLoaded, setClothGeometry } = createStudio(
+    renderConfig, body, geometry, unloadedGeometry, cloth.material
+  );
   const { camera, target, setView: positionCamera, rotate, zoom, zoomRatio } = createStageCamera(views, anchor => {
     const sample = sampleCloth(frame, surface, anchor.arcM, anchor.angleRad);
     return {
-      positionM: sample.position.map((coordinate, axis) => coordinate + sample.normal[axis] * anchor.distanceM),
-      targetM: sample.position
+      positionM: sample.position.map((coordinate, axis) =>
+        coordinate + (axis === 0 ? body.halfStanceM : 0) + sample.normal[axis] * anchor.distanceM),
+      targetM: [sample.position[0] + body.halfStanceM, ...sample.position.slice(1)]
     };
   });
   const comparison = createComparisonView(unloaded, comparisonConfig);
@@ -175,6 +192,7 @@ export async function start() {
   function setBarefoot(barefoot) {
     if (barefoot && unloaded.visible) setView('front');
     textile.visible = !barefoot;
+    setSkinLoaded(!barefoot);
     barefootButton.setAttribute('aria-pressed', String(barefoot));
     viewMode.disabled = barefoot || measuring;
     document.getElementById('legend').hidden = barefoot || cloth.mode.value === 0;
@@ -216,14 +234,14 @@ export async function start() {
         const measuredGeometry = createClothGeometry(fitted);
         try {
           if (includeFootFit) {
-            measured.footFit = measureFootFit(measuredGeometry, bodyParts[1], surface.footDistance, surface.footLimitM);
+            measured.footFit = measureFootFit(measuredGeometry, foot, surface.footDistance, surface.footLimitM);
           }
           if (includeRendering) {
-            textile.geometry = measuredGeometry;
+            setClothGeometry(measuredGeometry);
             measured.fullView = await profileView('front', 45);
           }
         } finally {
-          textile.geometry = geometry;
+          setClothGeometry(geometry);
           measuredGeometry.dispose();
         }
       }
@@ -315,7 +333,8 @@ export async function start() {
     window.stockingStage1a = {
       result, setView, setDisplay, setBarefoot, profileView, meshBenchmarks, unloadedGeometry,
       ...collectFitMetrics(frame, surface, optics, cloth.radiusM),
-      footFit: measureFootFit(geometry, bodyParts[1], surface.footDistance, surface.footLimitM),
+      footFit: measureFootFit(geometry, foot, surface.footDistance, surface.footLimitM),
+      lowerBody: { ...body, textile, tissueField },
       initial: { points: frame.points, triangles: frame.triangles, prepareMs: initial.prepareMs, ...summarize(frame.elapsedMs) }
     };
   }

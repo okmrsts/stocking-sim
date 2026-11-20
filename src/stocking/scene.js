@@ -1,18 +1,28 @@
 import {
-  Color, DirectionalLight, HemisphereLight, Mesh, MeshBasicNodeMaterial,
+  Color, DirectionalLight, Group, HemisphereLight, Mesh, MeshBasicNodeMaterial,
   MeshStandardMaterial, PlaneGeometry, Scene
 } from 'three/webgpu';
 import { uv, wgslFn } from 'three/tsl';
 
-export function createStudio(config, bodyParts, clothGeometry, unloadedGeometry, clothMaterial) {
+export function createStudio(config, body, clothGeometry, unloadedGeometry, clothMaterial) {
   const scene = new Scene();
   scene.background = new Color(config.background);
 
   const skin = new MeshStandardMaterial({ color: config.skin, roughness: 0.74, metalness: 0.0 });
-  for (const geometry of bodyParts) scene.add(new Mesh(geometry, skin));
-
-  const textile = new Mesh(clothGeometry, clothMaterial);
-  textile.renderOrder = 2;
+  const torso = new Mesh(body.loaded, skin);
+  scene.add(torso);
+  const textile = new Group();
+  for (const side of [1, -1]) {
+    const foot = new Mesh(body.foot, skin);
+    foot.position.x = side * body.halfStanceM;
+    foot.scale.x = side;
+    scene.add(foot);
+    const stocking = new Mesh(clothGeometry, clothMaterial);
+    stocking.position.x = foot.position.x;
+    stocking.scale.x = side;
+    stocking.renderOrder = 2;
+    textile.add(stocking);
+  }
   scene.add(textile);
   const unloaded = new Mesh(unloadedGeometry, clothMaterial);
   unloaded.renderOrder = 2;
@@ -27,10 +37,13 @@ export function createStudio(config, bodyParts, clothGeometry, unloadedGeometry,
       return vec4<f32>(0.20, 0.125, 0.115, 0.31 * weight);
     }
   `)({ uvPoint: uv() });
-  const shadow = new Mesh(new PlaneGeometry(0.40, 0.63), contact);
-  shadow.rotation.x = -Math.PI / 2;
-  shadow.position.set(0.015, 0.001, 0.050);
-  scene.add(shadow);
+  const shadowGeometry = new PlaneGeometry(0.36, 0.63);
+  for (const side of [1, -1]) {
+    const shadow = new Mesh(shadowGeometry, contact);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.set(side * body.halfStanceM, 0.001, 0.050);
+    scene.add(shadow);
+  }
 
   scene.add(new HemisphereLight(0xfff3ea, 0xb9a5aa, 1.75));
   const warm = new DirectionalLight(config.warmLight, 2.1);
@@ -39,5 +52,11 @@ export function createStudio(config, bodyParts, clothGeometry, unloadedGeometry,
   const cool = new DirectionalLight(config.coolLight, 0.75);
   cool.position.set(1.5, 1.1, -0.9);
   scene.add(cool);
-  return { scene, textile, unloaded };
+  return {
+    scene, textile, unloaded,
+    setSkinLoaded: loaded => { torso.geometry = loaded ? body.loaded : body.bare; },
+    setClothGeometry: geometry => {
+      for (const stocking of textile.children) stocking.geometry = geometry;
+    }
+  };
 }
