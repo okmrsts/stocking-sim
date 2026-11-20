@@ -5,37 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>ストッキング・シミュレーター</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
-      padding: 1.5rem;
-      background: #eef1f5;
-      color: #142031;
-      font: 1rem/1.6 system-ui, sans-serif;
-    }
-    main { width: min(100%, 38rem); }
-    h1 { font-size: clamp(1.25rem, 5vw, 2rem); line-height: 1.3; }
-    canvas {
-      display: block;
-      width: 100%;
-      aspect-ratio: 2 / 1;
-      border-radius: 1rem;
-      background: #142031;
-    }
-    #status { margin-bottom: 0.25rem; font-weight: 700; }
-    #details {
-      margin: 0;
-      max-height: 12rem;
-      overflow: auto;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-      font: inherit;
-    }
-  </style>
+  <link rel="stylesheet" href="./src/style.css">
   <script type="importmap">
     {
       "imports": {
@@ -49,125 +19,62 @@
 </head>
 <body>
   <main>
-    <h1>ストッキング・シミュレーター</h1>
-    <p>段階0 · WebGPU描画テスト</p>
-    <canvas width="640" height="320" aria-label="WebGPU描画テスト用の図形"></canvas>
-    <p id="status" role="status" data-state="loading">WebGPU を確認しています…</p>
-    <pre id="details" hidden></pre>
-    <noscript>描画テストには JavaScript が必要です。</noscript>
+    <header class="header">
+      <div>
+        <h1>ストッキング・シミュレーター</h1>
+        <p>20D 平編みニーハイ</p>
+      </div>
+      <a class="probe-link" href="./checks/0/probe.html">WebGPU診断</a>
+    </header>
+    <section class="viewer" aria-label="ニーハイの着用状態">
+      <div class="stage" id="stage">
+        <canvas aria-label="20D 平編みニーハイの3D表示"></canvas>
+        <div class="view-label" id="view-label">全体</div>
+        <div class="scale" id="scale" hidden><span></span>1 mm</div>
+        <p id="status" role="status" data-state="loading">WebGPU を初期化しています…</p>
+        <pre id="details" hidden></pre>
+        <div id="legend" hidden><div class="legend-fill"></div><div id="legend-text"></div></div>
+      </div>
+      <nav class="toolbar" aria-label="視点">
+        <button type="button" data-view="front" aria-pressed="true">全体</button>
+        <button type="button" data-view="oblique" aria-pressed="false">斜め</button>
+        <button type="button" data-view="ankle-wrinkles" aria-pressed="false">シワ</button>
+        <button type="button" data-view="thigh" aria-pressed="false">太もも</button>
+        <button type="button" data-view="thigh-macro" aria-pressed="false">極限マクロ</button>
+        <button type="button" id="settings-open">確かめる</button>
+      </nav>
+      <div class="subviews" id="subviews" aria-label="観察箇所" hidden></div>
+    </section>
+    <div class="footer" aria-label="計測情報">
+      <span id="mesh-stats">布メッシュを準備中</span>
+      <span id="solve-stats"></span>
+      <span id="frame-stats"></span>
+    </div>
+
+    <dialog id="settings" aria-labelledby="settings-title">
+      <form method="dialog" class="sheet-heading">
+        <h2 id="settings-title">確かめ用の表示</h2><button type="submit">閉じる</button>
+      </form>
+      <label for="display-mode">表示する項目</label>
+      <select id="display-mode">
+        <option value="0">着用状態</option><option value="1">張力</option>
+        <option value="2">周方向の伸び</option><option value="3">肌との隙間</option>
+        <option value="4">不透明度</option><option value="5">濡れ（0%）</option>
+        <option value="6">接触圧</option>
+      </select>
+      <button type="button" id="benchmark">解像度別の布計算を測る</button>
+      <p class="measurement" id="benchmark-result" aria-live="polite"></p>
+    </dialog>
   </main>
   <script type="module">
-    const view = Object.freeze({ width: 640, height: 320, fpsIntervals: 120 });
-    const canvas = document.querySelector('canvas');
-    const status = document.querySelector('#status');
-    const details = document.querySelector('#details');
-    const result = { backend: null, revision: null, fps: null, validationErrors: 0, errors: [] };
-    window.stockingProbe = result;
-
-    function setStatus(state, message) {
-      status.dataset.state = state;
-      status.textContent = message;
-    }
-
-    function reportError(label, error, isValidationError = false) {
-      if (isValidationError) result.validationErrors++;
-      result.errors.push(label + ' — ' + (error?.message ?? error));
-      details.textContent = result.errors.join('\n');
+    import('./src/main.js').then(({ start }) => start()).catch(error => {
+      const status = document.querySelector('#status');
+      status.dataset.state = 'error';
+      status.textContent = '初期化できませんでした';
+      const details = document.querySelector('#details');
+      details.textContent = error.message;
       details.hidden = false;
-      setStatus('error', '描画テストでエラーが発生しました');
-    }
-
-    function measureFrames(renderer, scene, camera) {
-      return new Promise((resolve, reject) => {
-        let firstTime;
-        let intervals = 0;
-
-        function draw(time) {
-          try {
-            renderer.render(scene, camera);
-          } catch (error) {
-            reject(error);
-            return;
-          }
-
-          if (firstTime === undefined) {
-            firstTime = time;
-          } else {
-            intervals++;
-          }
-          if (intervals < view.fpsIntervals) {
-            requestAnimationFrame(draw);
-          } else {
-            resolve(intervals * 1000 / (time - firstTime));
-          }
-        }
-        requestAnimationFrame(draw);
-      });
-    }
-
-    async function runProbe() {
-      if (!globalThis.isSecureContext || !navigator.gpu) {
-        setStatus('unsupported', 'この環境では WebGPU を利用できません');
-        return;
-      }
-
-      const adapter = await navigator.gpu.requestAdapter();
-      if (!adapter) {
-        setStatus('unsupported', 'WebGPU アダプターを取得できません');
-        return;
-      }
-
-      const device = await adapter.requestDevice();
-      device.addEventListener('uncapturederror', event => {
-        reportError('WebGPU', event.error, event.error instanceof GPUValidationError);
-      });
-      device.lost.then(info => reportError('WebGPU デバイス消失', info.message || info.reason));
-
-      const [THREE, { uv, wgslFn }] = await Promise.all([
-        import('three/webgpu'),
-        import('three/tsl')
-      ]);
-      result.revision = THREE.REVISION;
-      const renderer = new THREE.WebGPURenderer({ canvas, device, alpha: false });
-      // r185 installs a WebGL fallback by default. Keep this probe WebGPU-only.
-      renderer._getFallback = null;
-      device.pushErrorScope('validation');
-
-      try {
-        await renderer.init();
-        if (renderer.backend.isWebGPUBackend !== true || renderer.backend.device !== device) {
-          throw new Error('指定した WebGPU デバイスで描画を初期化できませんでした。');
-        }
-        result.backend = 'WebGPU';
-        renderer.setSize(view.width, view.height, false);
-
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x142031);
-        const camera = new THREE.OrthographicCamera(-2, 2, 1, -1, 0.01, 10);
-        camera.position.z = 2;
-        const material = new THREE.MeshBasicNodeMaterial();
-        const probeColor = wgslFn(`
-          fn probeColor(sampleUv: vec2<f32>) -> vec3<f32> {
-            return mix(vec3<f32>(0.03, 0.28, 0.75), vec3<f32>(0.10, 0.92, 0.50), sampleUv.x);
-          }
-        `);
-        material.colorNode = probeColor({ sampleUv: uv() });
-        const shape = new THREE.CircleGeometry(0.63, 3, 1.57079632679);
-        scene.add(new THREE.Mesh(shape, material));
-
-        result.fps = await measureFrames(renderer, scene, camera);
-        await device.queue.onSubmittedWorkDone();
-      } finally {
-        const validationError = await device.popErrorScope();
-        if (validationError) reportError('WebGPU 検証', validationError, true);
-      }
-
-      if (result.errors.length === 0) {
-        setStatus('ready', 'WebGPU 描画成功 · 検証エラー 0件');
-      }
-    }
-
-    runProbe().catch(error => reportError('初期化・描画', error));
+    });
   </script>
 </body>
 </html>

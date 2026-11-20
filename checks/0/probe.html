@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>ストッキング・シミュレーター</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background: #eef1f5;
+      color: #142031;
+      font: 1rem/1.6 system-ui, sans-serif;
+    }
+    main { width: min(100%, 38rem); }
+    h1 { font-size: clamp(1.25rem, 5vw, 2rem); line-height: 1.3; }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 2 / 1;
+      border-radius: 1rem;
+      background: #142031;
+    }
+    #status { margin-bottom: 0.25rem; font-weight: 700; }
+    #details {
+      margin: 0;
+      max-height: 12rem;
+      overflow: auto;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      font: inherit;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.webgpu.js",
+        "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.webgpu.js",
+        "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.tsl.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <main>
+    <h1>ストッキング・シミュレーター</h1>
+    <p>段階0 · WebGPU描画テスト</p>
+    <canvas width="640" height="320" aria-label="WebGPU描画テスト用の図形"></canvas>
+    <p id="status" role="status" data-state="loading">WebGPU を確認しています…</p>
+    <pre id="details" hidden></pre>
+    <noscript>描画テストには JavaScript が必要です。</noscript>
+  </main>
+  <script type="module">
+    const view = Object.freeze({ width: 640, height: 320, fpsIntervals: 120 });
+    const canvas = document.querySelector('canvas');
+    const status = document.querySelector('#status');
+    const details = document.querySelector('#details');
+    const result = { backend: null, revision: null, fps: null, validationErrors: 0, errors: [] };
+    window.stockingProbe = result;
+
+    function setStatus(state, message) {
+      status.dataset.state = state;
+      status.textContent = message;
+    }
+
+    function reportError(label, error) {
+      if (error?.constructor?.name === "GPUValidationError") result.validationErrors++;
+      result.errors.push(label + ' — ' + (error?.message ?? error));
+      details.textContent = result.errors.join('\n');
+      details.hidden = false;
+      setStatus('error', '描画テストでエラーが発生しました');
+    }
+
+    function measureFrames(renderer, scene, camera) {
+      return new Promise((resolve, reject) => {
+        let firstTime;
+        let intervals = 0;
+
+        function draw(time) {
+          try {
+            renderer.render(scene, camera);
+          } catch (error) {
+            reject(error);
+            return;
+          }
+
+          if (firstTime === undefined) {
+            firstTime = time;
+          } else {
+            intervals++;
+          }
+          if (intervals < view.fpsIntervals) {
+            requestAnimationFrame(draw);
+          } else {
+            resolve(intervals * 1000 / (time - firstTime));
+          }
+        }
+        requestAnimationFrame(draw);
+      });
+    }
+
+    async function runProbe() {
+      const [THREE, { uv, wgslFn }, { createGpuContext, withGpuValidation }] = await Promise.all([
+        import('three/webgpu'),
+        import('three/tsl'),
+        import('../../src/core/gpu/context.js')
+      ]);
+      let context;
+      try {
+        context = await createGpuContext(canvas, reportError);
+      } catch (error) {
+        if (/利用できません|アダプターを取得できません/.test(error.message)) {
+          setStatus('unsupported', error.message);
+          return;
+        }
+        throw error;
+      }
+      const { device, renderer } = context;
+      result.revision = context.revision;
+
+      await withGpuValidation(device, reportError, async () => {
+        result.backend = 'WebGPU';
+        renderer.setSize(view.width, view.height, false);
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x142031);
+        const camera = new THREE.OrthographicCamera(-2, 2, 1, -1, 0.01, 10);
+        camera.position.z = 2;
+        const material = new THREE.MeshBasicNodeMaterial();
+        const probeColor = wgslFn(`
+          fn probeColor(sampleUv: vec2<f32>) -> vec3<f32> {
+            return mix(vec3<f32>(0.03, 0.28, 0.75), vec3<f32>(0.10, 0.92, 0.50), sampleUv.x);
+          }
+        `);
+        material.colorNode = probeColor({ sampleUv: uv() });
+        const shape = new THREE.CircleGeometry(0.63, 3, 1.57079632679);
+        scene.add(new THREE.Mesh(shape, material));
+
+        result.fps = await measureFrames(renderer, scene, camera);
+        await device.queue.onSubmittedWorkDone();
+      });
+
+      if (result.errors.length === 0) {
+        setStatus('ready', 'WebGPU 描画成功 · 検証エラー 0件');
+      }
+    }
+
+    runProbe().catch(error => reportError('初期化・描画', error));
+  </script>
+</body>
+</html>

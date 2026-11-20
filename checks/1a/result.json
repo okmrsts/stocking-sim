@@ -1,0 +1,237 @@
+{
+  "browser": "151.0.7922.34",
+  "platform": "linux x64",
+  "viewport": {
+    "width": 1440,
+    "height": 1080
+  },
+  "deviceScaleFactor": 1,
+  "chromeArgs": [
+    "--enable-unsafe-webgpu",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader",
+    "--enable-features=Vulkan,SkiaGraphite,DawnUseSwiftShader",
+    "--use-vulkan=swiftshader",
+    "--disable-vulkan-surface"
+  ],
+  "cdn": "cached-jsdelivr-response",
+  "mobileLayout": {
+    "overflows": false,
+    "closed": true,
+    "selectedView": "極限マクロ · 足首",
+    "displayedMode": "1"
+  },
+  "pageErrors": [],
+  "runtime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "yarnDiameterMicrometers": 59.54528205231674,
+  "samples": {
+    "thigh": {
+      "position": [
+        0.03394783288240433,
+        0.7038707137107849,
+        0.07216958701610565
+      ],
+      "normal": [
+        0.2688027002596546,
+        -0.06141655609979611,
+        0.9612352027313392
+      ],
+      "gapMm": 0.44999999227002263,
+      "stretchHoop": 2.7057271003723145,
+      "stretchAxial": 0.9781597852706909,
+      "tensionHoopNpm": 135.47100830078125,
+      "tensionAxialNpm": 1.96333909034729,
+      "pressurePa": 1879.0836181640625,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "normalOpacity": 0.22428430272549227
+    },
+    "ankle": {
+      "position": [
+        0.007895248010754585,
+        0.15799002349376678,
+        0.020501336082816124
+      ],
+      "normal": [
+        0.31204170658330116,
+        0.03642689124692849,
+        0.9493698199051123
+      ],
+      "gapMm": 1.770135248079896,
+      "stretchHoop": 1.2802801132202148,
+      "stretchAxial": 0.8884494304656982,
+      "tensionHoopNpm": 6.380174160003662,
+      "tensionAxialNpm": 0,
+      "pressurePa": 0,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "normalOpacity": 0.27290354149136264
+    },
+    "cuff": {
+      "position": [
+        0.037351589649915695,
+        0.7807013392448425,
+        0.07640989869832993
+      ],
+      "normal": [
+        0.1735859469595306,
+        -0.0808813707507003,
+        0.9814917844198446
+      ],
+      "gapMm": 0.44999999227002263,
+      "stretchHoop": 3.164424180984497,
+      "stretchAxial": 0.9732534885406494,
+      "tensionHoopNpm": 384.0628356933594,
+      "tensionAxialNpm": 3.9566829204559326,
+      "pressurePa": 4550.275390625,
+      "reinforcement": 2.1500000953674316,
+      "restRadiusM": 0.026799999177455902,
+      "normalOpacity": 0.4035863955849536
+    },
+    "toe": {
+      "position": [
+        0.013141694478690624,
+        0.06222298741340637,
+        0.14240559935569763
+      ],
+      "normal": [
+        0.05480276748428776,
+        0.9592568184657067,
+        0.2771696464317718
+      ],
+      "gapMm": 0.44999999227002263,
+      "stretchHoop": 2.070171594619751,
+      "stretchAxial": 0.8548617959022522,
+      "tensionHoopNpm": 57.14334487915039,
+      "tensionAxialNpm": 0,
+      "pressurePa": 1322.1383056640625,
+      "reinforcement": 1.9500000476837158,
+      "restRadiusM": 0.020999999716877937,
+      "normalOpacity": 0.442120579707624
+    },
+    "kneeFront": {
+      "position": [
+        0.0018263597739860415,
+        0.5170785188674927,
+        0.06241301819682121
+      ],
+      "normal": [
+        -0.0025704917296640855,
+        -0.31393651674784406,
+        0.9494404963053231
+      ],
+      "gapMm": 0.44999999227002263,
+      "stretchHoop": 2.0733156204223633,
+      "stretchAxial": 1.0855612754821777,
+      "tensionHoopNpm": 48.67790985107422,
+      "tensionAxialNpm": 3.195145606994629,
+      "pressurePa": 884.1599731445312,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "normalOpacity": 0.21813314874632694
+    },
+    "kneeBack": {
+      "position": [
+        0.0018332115141674876,
+        0.5373590588569641,
+        -0.03481319919228554
+      ],
+      "normal": [
+        0.0027317180912622445,
+        0.21813483057878622,
+        -0.9759148187237625
+      ],
+      "gapMm": 2.084801672026515,
+      "stretchHoop": 2.015890121459961,
+      "stretchAxial": 0.9092227816581726,
+      "tensionHoopNpm": 42.54417419433594,
+      "tensionAxialNpm": 0,
+      "pressurePa": 0,
+      "reinforcement": 1,
+      "restRadiusM": 0.026799999177455902,
+      "normalOpacity": 0.2455369239061862
+    }
+  },
+  "gaps": {
+    "ankleFront": {
+      "minMm": 0.4988863947801292,
+      "maxMm": 2.294649602845311,
+      "samples": 14
+    },
+    "kneeRear": {
+      "minMm": 0.44999999227002263,
+      "maxMm": 2.2993350867182016,
+      "samples": 15
+    }
+  },
+  "tensionOpacity": {
+    "samples": 16315,
+    "pearson": -0.5683249941157319
+  },
+  "initial": {
+    "points": 22945,
+    "triangles": 45120,
+    "prepareMs": 140.40000000037253,
+    "medianMs": 2.400000000372529,
+    "p95Ms": 3.699999999254942,
+    "samples": 7
+  },
+  "front": {
+    "fps": 11.765167261461233,
+    "durationMs": 7649.700000000001,
+    "medianMs": 83.30000000000291,
+    "p95Ms": 100,
+    "samples": 90,
+    "width": 1440,
+    "height": 1080
+  },
+  "macro": {
+    "fps": 5.299541884046024,
+    "durationMs": 16982.6,
+    "medianMs": 183.40000000000146,
+    "p95Ms": 200.09999999999854,
+    "samples": 90,
+    "width": 1440,
+    "height": 1080
+  },
+  "meshes": [
+    {
+      "id": "low",
+      "points": 9061,
+      "renderPoints": 9062,
+      "triangles": 17640,
+      "prepareMs": 61.29999999888241,
+      "medianMs": 2.300000000745058,
+      "p95Ms": 2.5,
+      "samples": 15
+    },
+    {
+      "id": "standard",
+      "points": 22945,
+      "renderPoints": 22946,
+      "triangles": 45120,
+      "prepareMs": 116.09999999962747,
+      "medianMs": 2.400000000372529,
+      "p95Ms": 2.699999999254942,
+      "samples": 15
+    },
+    {
+      "id": "high",
+      "points": 43165,
+      "renderPoints": 43166,
+      "triangles": 85272,
+      "prepareMs": 177.5,
+      "medianMs": 3.600000001490116,
+      "p95Ms": 4.200000001117587,
+      "samples": 15
+    }
+  ]
+}

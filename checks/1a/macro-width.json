@@ -1,0 +1,13 @@
+{
+  "thigh-macro": {
+    "medianPx": 18.0,
+    "approxMicrometers": 60.60323701770902,
+    "ridgeSamples": 3069
+  },
+  "ankle-macro": {
+    "medianPx": 17.88854381999832,
+    "approxMicrometers": 60.22798116805733,
+    "ridgeSamples": 4907
+  },
+  "relativeDifferencePercent": 0.6211240030283669
+}

@@ -1,5 +1,9 @@
 # 段階0の検証記録
 
+## iPhone Safari 実機
+
+ユーザーの確認報告。iPhone 18 Pro、iOS 27.3、Safari で青緑の三角形と「検証エラー 0件」が表示された。確認対象は段階0の診断ページ。現在は [WebGPU診断](probe.html) として残している。
+
 ## 自動撮影
 
 Linux x64 の作業環境で Chrome for Testing Headless Shell 151.0.7922.34 と SwiftShader を使用。WebGPU のバックエンドとデバイスが一致し、three.js のリビジョンが 185 であること、キャンバスの背景と WGSL のグラデーションが PNG に描かれることを確認した。
@@ -13,7 +17,7 @@ Linux x64 の作業環境で Chrome for Testing Headless Shell 151.0.7922.34 と
 | 故障注入の診断 | 未定義 WGSL 関数に対し行・列を含むエラーを画面に表示、1件 |
 | WebGPU アダプターを取得できない場合 | 既定のヘッドレス起動で非対応の表示を確認 |
 | 縦長表示 | 390 × 844 の Chromium モバイルエミュレーション。横方向のはみ出しなし |
-| 全体・極限マクロ、iPhone Safari | 段階0の診断には脚と布がないため FPS は未測定。Safari の動作も未確認 |
+| 全体・極限マクロ、iPhone Safari | 段階0の診断には脚と布がないため FPS は未測定。シミュレーターの Safari 実機 FPS は未測定 |
 
 [診断ページの写真](webgpu-probe.png)と[生の計測値](result.json)。段階0には脚と布のシーンがないため、全体・斜め・足首と膝裏・太もも・極限マクロの写真、前段階との比較はない。五視点の設定は [views.json](../views.json) に保存した。
 
