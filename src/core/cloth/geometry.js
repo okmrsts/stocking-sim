@@ -11,24 +11,8 @@ export function createClothGeometry(frame) {
   const indices = surfaceIndices(columns, rows);
   coordinates.set(materialCoordsM);
 
-  for (let node = 0; node < points; node++) {
-    const pos = node * 16;
-    positions.set(state.subarray(pos, pos + 3), 3 * node);
-    fields.set(state.subarray(pos + 4, pos + 8), 4 * node);
-    details.set(state.subarray(pos + 8, pos + 12), 4 * node);
-    selfContact[node] = state[pos + 12];
-  }
-
-  for (let column = 0; column < columns; column++) {
-    for (let axis = 0; axis < 3; axis++) {
-      positions[points * 3 + axis] += positions[column * 3 + axis] / columns;
-    }
-    indices.push(points, column + 1, column);
-  }
+  for (let column = 0; column < columns; column++) indices.push(points, column + 1, column);
   coordinates[points * 2] = coordinates[columns * 2] * 0.5;
-  fields.set(fields.subarray(0, 4), points * 4);
-  details.set(details.subarray(0, 4), points * 4);
-
   const geometry = new BufferGeometry();
   geometry.setIndex(indices);
   geometry.setAttribute('position', new BufferAttribute(positions, 3));
@@ -36,7 +20,31 @@ export function createClothGeometry(frame) {
   geometry.setAttribute('clothFields', new BufferAttribute(fields, 4));
   geometry.setAttribute('clothDetails', new BufferAttribute(details, 4));
   geometry.setAttribute('selfContact', new BufferAttribute(selfContact, 1));
+  updateClothGeometry(geometry, frame, state);
+  return geometry;
+}
+
+export function updateClothGeometry(geometry, { columns, rows, points }, state) {
+  const position = geometry.getAttribute('position');
+  const fields = geometry.getAttribute('clothFields');
+  const details = geometry.getAttribute('clothDetails');
+  const selfContact = geometry.getAttribute('selfContact');
+  position.array.fill(0, points * 3);
+  for (let node = 0; node < points; node++) {
+    const s = node * 16;
+    position.setXYZ(node, state[s], state[s + 1], state[s + 2]);
+    fields.setXYZW(node, state[s + 4], state[s + 5], state[s + 6], state[s + 7]);
+    details.setXYZW(node, state[s + 8], state[s + 9], state[s + 10], state[s + 11]);
+    selfContact.setX(node, state[s + 12]);
+    if (node < columns) {
+      for (let axis = 0; axis < 3; axis++) position.array[points * 3 + axis] += state[s + axis] / columns;
+    }
+  }
+  fields.array.set(fields.array.subarray(0, 4), points * 4);
+  details.array.set(details.array.subarray(0, 4), points * 4);
+  for (const attribute of [position, fields, details, selfContact]) attribute.needsUpdate = true;
   geometry.computeVertexNormals();
+  geometry.computeBoundingSphere();
   const normals = geometry.getAttribute('normal');
   for (let row = 0; row <= rows; row++) {
     const first = row * (columns + 1);
@@ -48,7 +56,6 @@ export function createClothGeometry(frame) {
     normals.setXYZ(first, x / length, y / length, z / length);
     normals.setXYZ(last, x / length, y / length, z / length);
   }
-  return geometry;
 }
 
 export function sampleCloth(frame, surface, arc, angle) {

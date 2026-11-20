@@ -5,7 +5,7 @@ export function createComparisonView(referenceMesh, { heightM, minHeightM, minWi
   const right = new Vector3();
   const back = new Vector3();
 
-  function synchronize(orbitCamera, target, zoomRatio) {
+  function synchronize(orbitCamera, target, zoomRatio, referenceDepth = 0) {
     const width = Math.max(minWidthM, orbitCamera.aspect * Math.max(minHeightM, heightM * zoomRatio));
     const height = width / orbitCamera.aspect;
     camera.left = -width / 2;
@@ -19,6 +19,7 @@ export function createComparisonView(referenceMesh, { heightM, minHeightM, minWi
     back.set(0, 0, 1).applyQuaternion(camera.quaternion);
     const separation = width / 2;
     referenceMesh.position.copy(right).multiplyScalar(separation);
+    referenceMesh.position.z -= referenceDepth;
     camera.position.copy(target).addScaledVector(back, cameraDistanceM).addScaledVector(right, separation / 2);
     camera.updateProjectionMatrix();
     return camera;

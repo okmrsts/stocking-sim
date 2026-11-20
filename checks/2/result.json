@@ -1,0 +1,221 @@
+{
+  "chromium": "151.0.7922.34",
+  "runtime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "mobileRuntime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "pageErrors": [],
+  "front": {
+    "fps": 6.020348778872591,
+    "durationMs": 4983.0999999999985,
+    "medianMs": 166.6999999999971,
+    "p95Ms": 183.40000000000146,
+    "samples": 30,
+    "width": 1440,
+    "height": 1080
+  },
+  "macro": {
+    "fps": 3.621876131836291,
+    "durationMs": 8283,
+    "medianMs": 283.3000000000029,
+    "p95Ms": 300,
+    "samples": 30,
+    "width": 1440,
+    "height": 1080
+  },
+  "intersections": [
+    {
+      "progress": 1,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.995,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.96,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.9,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.83,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.72,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.61,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.52,
+      "footCentres": 36544,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.47,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.43,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.35,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.32,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.3,
+      "footCentres": 45056,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.285,
+      "footCentres": 18688,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.275,
+      "footCentres": 9984,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.24,
+      "footCentres": 1792,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.19,
+      "footCentres": 0,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.1,
+      "footCentres": 0,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0,
+      "footCentres": 0,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    }
+  ],
+  "playback": {
+    "lower": {
+      "progress": 0.43,
+      "target": 0.43,
+      "action": "lower",
+      "settling": 0,
+      "collisionStops": 0,
+      "lastCrossing": -1,
+      "fps": 6.02431413183609,
+      "intervals": 50
+    },
+    "paused": {
+      "progress": 0.5076515151515151,
+      "target": 0.5076515151515151,
+      "action": "dress",
+      "settling": 0,
+      "collisionStops": 1,
+      "lastCrossing": 8740,
+      "fps": 10.499475026248676,
+      "intervals": 7
+    },
+    "remove": {
+      "progress": 0,
+      "target": 0,
+      "action": "remove",
+      "settling": 1.5,
+      "collisionStops": 28,
+      "lastCrossing": 22017,
+      "fps": 10.494215835154387,
+      "intervals": 85
+    },
+    "dress": {
+      "progress": 1,
+      "target": 1,
+      "action": "dress",
+      "settling": 0,
+      "collisionStops": 54,
+      "lastCrossing": 8869,
+      "fps": 10.085266342715684,
+      "intervals": 99
+    }
+  },
+  "mobileViewport": [
+    390,
+    844
+  ]
+}

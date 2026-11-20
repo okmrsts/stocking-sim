@@ -1,5 +1,7 @@
 # ストッキング・シミュレーター
 
+「着脱」から、20Dニーハイの着用、ずり下ろし、引き抜き、素脚と布の別表示を試せます。
+
 WebGPU 専用の布シミュレーターを段階ごとに作ります。段階1aでは固定版 three.js と自作 WGSL で、へそから下の両脚に20D平編みニーハイを着用させます。布の接触圧に応じた肌の変形と、無荷重時の布の基準形状を同じ縮尺で比較できます。腰・骨盤・臀部・脚の寸法を調整して再フィットし、軟組織の変形しやすさを色表示できます。
 
 ## 開き方
@@ -12,12 +14,13 @@ WebGPU 専用の布シミュレーターを段階ごとに作ります。段階1
 
 | ファイル | 内容 |
 | --- | --- |
-| [index.html](index.html) | 段階1aの入口と固定 import map |
+| [index.html](index.html) | シミュレーターの入口と固定 import map |
 | [docs/SPEC.md](docs/SPEC.md) | 部品の境界、データ、物理、表示、検証仕様 |
-| [docs/MANUAL.md](docs/MANUAL.md) | 診断の使い方と後段の操作予定 |
+| [docs/MANUAL.md](docs/MANUAL.md) | 着脱と診断の操作 |
 | [docs/EXTENDING.md](docs/EXTENDING.md) | 編み組織・素材・外部モデルの拡張点 |
 | [docs/decisions/](docs/decisions/) | 設計上の決定 |
 | [src/](src/) | WebGPU初期化、脚の曲面、布計算、編み目、画面・設定 |
 | [checks/views-1a-anatomy.json](checks/views-1a-anatomy.json) | 下半身の固定五視点と側面・背面・臀部・足部・履き口 |
+| [checks/2/](checks/2/README.md) | 着脱の写真と検証記録 |
 | [checks/0/](checks/0/) | 段階0の検証記録 |
 | [CHANGELOG.md](CHANGELOG.md) | 段階別の変更履歴 |

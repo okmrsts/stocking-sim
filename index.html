@@ -40,6 +40,7 @@
       </div>
       <nav class="toolbar" aria-label="視点">
         <button type="button" data-view="comparison" aria-pressed="true">着用比較</button>
+        <button type="button" id="dressing-open" aria-expanded="false" disabled>着脱</button>
         <button type="button" data-view="front" aria-pressed="false">全体</button>
         <button type="button" data-view="oblique" aria-pressed="false">斜め</button>
         <button type="button" data-view="ankle-wrinkles" aria-pressed="false">シワ</button>
@@ -51,6 +52,27 @@
         <button type="button" id="settings-open">確かめる</button>
       </nav>
       <div class="subviews" id="subviews" aria-label="観察箇所" hidden></div>
+      <section class="dressing-controls" id="dressing-controls" aria-label="着脱と別表示" hidden>
+        <div class="dressing-actions">
+          <button type="button" id="dress">履く</button>
+          <button type="button" id="lower">ずり下ろす</button>
+          <button type="button" id="remove">引き抜く</button>
+          <button type="button" id="pause-dressing">一時停止</button>
+        </div>
+        <label class="travel-label">
+          <span>着用位置</span>
+          <input type="range" id="dressing-progress" min="0" max="1000" value="1000">
+          <output id="dressing-position">着用中</output>
+        </label>
+        <label class="arrangement">表示
+          <select id="dressing-arrangement">
+            <option value="together">着脱を表示</option>
+            <option value="split">素脚と布を並べる</option>
+            <option value="cloth">ストッキングのみ</option>
+            <option value="body">素脚のみ</option>
+          </select>
+        </label>
+      </section>
     </section>
     <div class="footer" aria-label="計測情報">
       <span id="mesh-stats">布メッシュを準備中</span>

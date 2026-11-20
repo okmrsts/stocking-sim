@@ -43,12 +43,14 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
     }
   `)({ uvPoint: uv() });
   const shadowGeometry = new PlaneGeometry(0.36, 0.63);
+  const shadows = new Group();
   for (const side of [1, -1]) {
     const shadow = new Mesh(shadowGeometry, contact);
     shadow.rotation.x = -Math.PI / 2;
     shadow.position.set(side * body.halfStanceM, 0.001, 0.050);
-    scene.add(shadow);
+    shadows.add(shadow);
   }
+  scene.add(shadows);
 
   scene.add(new HemisphereLight(0xfff3ea, 0xb9a5aa, 1.75));
   const warm = new DirectionalLight(config.warmLight, 2.1);
@@ -59,6 +61,11 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
   scene.add(cool);
   return {
     scene, textile, unloaded,
+    setBodyVisible: visible => {
+      torso.visible = visible;
+      shadows.visible = visible;
+    },
+    setNailsVisible: visible => { nails.visible = visible; },
     setSkinLoaded: loaded => { torso.geometry = loaded ? body.loaded : body.bare; },
     setBody: next => {
       body = next;

@@ -16,6 +16,8 @@ import { createStageCamera } from './stocking/stage-camera.js';
 import { createComparisonView } from './stocking/comparison-view.js';
 import { collectFitMetrics } from './stocking/stage1a-metrics.js';
 import { measureFootFit } from './stocking/foot-fit-metrics.js';
+import { dressingConfig } from './config/dressing.js';
+import { createDressingPlayer } from './stocking/dressing-player.js';
 
 const query = new URLSearchParams(location.search);
 const format = new Intl.NumberFormat('ja-JP');
@@ -64,6 +66,9 @@ export async function start() {
   const response = await fetch(new URL('../checks/views-1a-anatomy.json', import.meta.url));
   if (!response.ok) throw new Error('視点の設定を読み込めません。');
   const { views, defaultView } = await response.json();
+  views.dressing = dressingConfig.view;
+  views['dressing-detached'] = dressingConfig.detachedView;
+  views['dressing-split'] = dressingConfig.splitView;
   const solver = await withGpuValidation(device, reportError, () => createStaticShellSolver(device));
   const solve = (...args) => withGpuValidation(device, reportError, () => solver(...args));
   let fitting = await buildFitting({}, solve, 7);
@@ -76,7 +81,8 @@ export async function start() {
   };
   const cloth = createTextileMaterial(optics, diagnostics);
   const unloadedGeometry = createUnloadedGeometry(fitting.frame);
-  const { scene, textile, unloaded, setSkinLoaded, setBody, setTissueMap, setClothGeometry } = createStudio(
+  const { scene, textile, unloaded, setSkinLoaded, setBody, setTissueMap, setClothGeometry,
+    setBodyVisible, setNailsVisible } = createStudio(
     renderConfig, fitting.body, fitting.geometry, unloadedGeometry, cloth.material, tissueDisplay
   );
   const { camera, target, setView: positionCamera, setAspect, rotate, zoom, zoomRatio } = createStageCamera(views, anchor => {
@@ -89,7 +95,9 @@ export async function start() {
     };
   });
   const comparison = createComparisonView(unloaded, comparisonConfig);
-  const draw = () => renderer.render(scene, unloaded.visible ? comparison.synchronize(camera, target, zoomRatio()) : camera);
+  const draw = () => renderer.render(scene, unloaded.visible
+    ? comparison.synchronize(camera, target, zoomRatio(), comparisonDepth)
+    : camera);
   let currentView = defaultView;
   let resizeQueued = false;
   let drawQueued = false;
@@ -97,6 +105,103 @@ export async function start() {
   let userMovedCamera = false;
   let tissueVisible = false;
   let bareBeforeMap = false;
+  let arrangement = 'together';
+  let comparisonDepth = 0;
+  let viewingBarefoot = false;
+  const dressingOpen = document.getElementById('dressing-open');
+  const dressingControls = document.getElementById('dressing-controls');
+  const dressingProgress = document.getElementById('dressing-progress');
+  const dressingPosition = document.getElementById('dressing-position');
+  const dressingArrangement = document.getElementById('dressing-arrangement');
+  let draggingProgress = false;
+  const dressing = createDressingPlayer({
+    device, getFitting: () => fitting, onError: reportError,
+    onBlocked: () => { dressingPosition.value = '接触で停止'; },
+    show: (geometry, progress, elapsed, framesPerSecond) => {
+      setClothGeometry(geometry);
+      if (!draggingProgress) dressingProgress.value = Math.round(1000 * progress);
+      const label = progress === 1 ? '着用中' : progress === 0 ? '脱衣後' : Math.round(progress * 100) + '%';
+      dressingPosition.value = label;
+      dressingProgress.setAttribute('aria-valuetext', label);
+      if (framesPerSecond > 0) frameStats.textContent = '着脱 ' + framesPerSecond.toFixed(1) + ' FPS';
+      updateArrangement(progress);
+      requestDraw();
+    }
+  });
+
+  function updateArrangement(progress = dressing.status().progress) {
+    const split = arrangement === 'split';
+    const clothOnly = arrangement === 'cloth';
+    const bodyOnly = arrangement === 'body';
+    setBodyVisible(!clothOnly);
+    setNailsVisible(!clothOnly && !tissueVisible);
+    textile.visible = clothOnly || (!split && !bodyOnly && !viewingBarefoot);
+    setSkinLoaded(arrangement === 'together' && progress > 0 && !viewingBarefoot);
+    const oldComparison = currentView === 'comparison';
+    unloaded.visible = split || oldComparison;
+    const draped = split && progress === 0;
+    unloaded.geometry = draped ? textile.children[0].geometry : unloadedGeometry;
+    comparisonDepth = draped ? unloaded.geometry.boundingSphere.center.z : 0;
+    comparisonLabels.hidden = !unloaded.visible;
+    comparisonLabels.children[0].textContent = split ? '素脚' : '両脚に着用';
+    comparisonLabels.children[1].textContent = draped ? '脱衣後の布' : '未着用（無荷重）';
+    viewMode.disabled = !textile.visible || measuring;
+    for (const mode of [3, 6, 7]) viewMode.options[mode].disabled = progress < 1;
+    if (viewMode.selectedOptions[0]?.disabled) setDisplay(0);
+    dressingArrangement.value = arrangement;
+    updateLegend();
+  }
+
+  function enterDressing() {
+    if (measuring) return;
+    if (tissueVisible) setTissueVisible(false);
+    if (viewingBarefoot) setBarefoot(false);
+    dressingControls.hidden = false;
+    dressingOpen.setAttribute('aria-expanded', 'true');
+    if (!currentView.startsWith('dressing')) setView('dressing');
+    updateArrangement();
+    requestDraw();
+  }
+
+  dressingOpen.addEventListener('click', () => {
+    if (measuring) return;
+    if (dressingControls.hidden) enterDressing();
+    else {
+      dressingControls.hidden = true;
+      dressingOpen.setAttribute('aria-expanded', 'false');
+      arrangement = 'together';
+      setView('dressing');
+      updateArrangement();
+      requestDraw();
+    }
+  });
+  for (const [id, target] of [['dress', 1], ['lower', 0.43], ['remove', 0]]) {
+    document.getElementById(id).addEventListener('click', () => {
+      if (measuring) return;
+      enterDressing();
+      arrangement = 'together';
+      setView('dressing');
+      updateArrangement();
+      dressing.move(target, id);
+    });
+  }
+  document.getElementById('pause-dressing').addEventListener('click', () => dressing.pause());
+  dressingProgress.addEventListener('input', () => {
+    if (measuring) return;
+    dressing.move(Number(dressingProgress.value) / 1000, 'scrub');
+  });
+  dressingProgress.addEventListener('pointerdown', () => { draggingProgress = true; });
+  for (const event of ['pointerup', 'pointercancel', 'blur']) {
+    addEventListener(event, () => { draggingProgress = false; }, true);
+  }
+  dressingArrangement.addEventListener('change', () => {
+    if (measuring) return;
+    arrangement = dressingArrangement.value;
+    setView(arrangement === 'split' ? 'dressing-split'
+      : arrangement === 'cloth' && dressing.status().progress === 0 ? 'dressing-detached' : 'dressing');
+    updateArrangement();
+    requestDraw();
+  });
 
   function requestDraw() {
     if (drawQueued || measuring) return;
@@ -126,10 +231,14 @@ export async function start() {
     userMovedCamera = false;
     positionCamera(viewId);
     const comparing = viewId === 'comparison';
+    if (comparing || !viewId.startsWith('dressing') && arrangement !== 'together') {
+      arrangement = 'together';
+      updateArrangement();
+    }
     if (comparing && tissueVisible) setTissueVisible(false);
-    unloaded.visible = comparing;
-    comparisonLabels.hidden = !comparing;
-    viewLabel.hidden = comparing;
+    unloaded.visible = comparing || arrangement === 'split';
+    comparisonLabels.hidden = !unloaded.visible;
+    viewLabel.hidden = unloaded.visible;
     if (comparing && !textile.visible) setBarefoot(false);
     const current = views[viewId];
     const label = current.group === 'macro' ? '極限マクロ · ' : current.group === 'wrinkles' ? 'シワ · ' : '';
@@ -178,8 +287,9 @@ export async function start() {
   const barefootButton = document.getElementById('bare-foot');
   function setBarefoot(barefoot) {
     if (barefoot && unloaded.visible) setView('front');
+    viewingBarefoot = barefoot;
     textile.visible = !barefoot;
-    setSkinLoaded(!barefoot);
+    setSkinLoaded(!barefoot && dressing.status().progress > 0);
     barefootButton.setAttribute('aria-pressed', String(barefoot));
     viewMode.disabled = barefoot || measuring;
     updateLegend();
@@ -204,7 +314,11 @@ export async function start() {
   barefootButton.addEventListener('click', () => {
     if (measuring) return;
     if (tissueVisible) setTissueVisible(false);
-    else setBarefoot(textile.visible);
+    else if (arrangement !== 'together') {
+      arrangement = 'together';
+      setView('front');
+      setBarefoot(true);
+    } else setBarefoot(textile.visible);
   });
 
   function resize() {
@@ -268,11 +382,16 @@ export async function start() {
     if (Object.entries(fitting.dimensions).every(([id, value]) => values[id] === value)) return true;
     measuring = true;
     try {
+      await dressing.pause();
       const next = await buildFitting(values, solve, 5);
       const previous = fitting;
       fitting = next;
       setBody(next.body);
       setClothGeometry(next.geometry);
+      updateArrangement(1);
+      dressing.reset();
+      dressingProgress.value = '1000';
+      dressingPosition.value = '着用中';
       setSkinLoaded(textile.visible);
       setTissueMap(tissueVisible);
       setView(currentView);
@@ -323,11 +442,17 @@ export async function start() {
     viewMode.disabled = true;
     output.textContent = '計測中…';
     const restoreView = currentView;
+    const restoreArrangement = arrangement;
     const restoreDisplay = cloth.mode.value;
     const restoreMap = tissueVisible;
     if (restoreMap) setTissueVisible(false);
     const restoreBarefoot = !textile.visible;
+    let restoreMotion;
     try {
+      await dressing.pause();
+      restoreMotion = dressing.status();
+      arrangement = 'together';
+      await dressing.inspect(1);
       setBarefoot(false);
       setDisplay(0);
       const front = await profileView('front', 72);
@@ -349,7 +474,13 @@ export async function start() {
       viewMode.disabled = false;
       setView(restoreView);
       setDisplay(restoreDisplay);
+      if (restoreMotion) await dressing.inspect(restoreMotion.progress, restoreMotion.settling);
       setBarefoot(restoreBarefoot);
+      if (restoreArrangement !== 'together') {
+        arrangement = restoreArrangement;
+        setView(restoreView);
+        updateArrangement();
+      }
       if (restoreMap) setTissueVisible(true);
     }
   });
@@ -380,6 +511,8 @@ export async function start() {
     const { frame, surface, body, geometry, tissueField, initial, dimensions } = fitting;
     window.stockingStage1a = {
       result, setView, setDisplay, setBarefoot, setTissueVisible, profileView, meshBenchmarks, unloadedGeometry,
+      dressing: { inspect: dressing.inspect, move: dressing.move, pause: dressing.pause, status: dressing.status },
+      surface,
       applyBody, dimensions,
       ...collectFitMetrics(frame, surface, optics, cloth.radiusM),
       footFit: measureFootFit(geometry, body.foot, surface.footDistance, surface.footLimitM),
@@ -388,4 +521,6 @@ export async function start() {
     };
   }
   exposeCapture();
+  dressingOpen.disabled = false;
+  if (query.get('view') === 'dressing' && !query.has('capture')) enterDressing();
 }
