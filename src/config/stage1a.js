@@ -1,4 +1,4 @@
-export { bodyProfile, footAnatomy } from './leg-anatomy.js';
+export { bodyProfile, footAnatomy, lowerBodyConfig } from './leg-anatomy.js';
 
 export const preset = Object.freeze({
   label: '20D 平編みニーハイ', denier: 20, fiberDensityKgM3: 1140, packingFraction: 0.70,
@@ -26,23 +26,6 @@ export const meshLevels = Object.freeze([
 ]);
 
 export const diagnostics = Object.freeze({ tensionNpmMax: 400, strainMax: 2.1, gapMmMax: 3.5, selfContactMmMax: 1.5 });
-
-export const lowerBodyConfig = Object.freeze({
-  halfStanceM: 0.095,
-  thighJoinArc: 0.912,
-  crotchDropM: 0.080,
-  crotchForwardM: 0.041,
-  // Y, half-width, Z center, front/back radius.
-  waistSections: [
-    [0.842, 0.190, -0.026, 0.108],
-    [0.875, 0.186, -0.026, 0.108],
-    [0.921, 0.169, -0.023, 0.097],
-    [0.969, 0.145, -0.012, 0.084],
-    [1.024, 0.133, -0.006, 0.081],
-    [1.037, 0.132, -0.006, 0.080]
-  ],
-  navel: { yM: 1.018, depthM: 0.0045, widthM: 0.009, heightM: 0.0055 }
-});
 
 export const tissue = Object.freeze({
   // Material arc, inward displacement per kPa, saturation depth.

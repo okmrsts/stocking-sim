@@ -13,12 +13,8 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
   scene.add(torso);
   const textile = new Group();
   for (const side of [1, -1]) {
-    const foot = new Mesh(body.foot, skin);
-    foot.position.x = side * body.halfStanceM;
-    foot.scale.x = side;
-    scene.add(foot);
     const stocking = new Mesh(clothGeometry, clothMaterial);
-    stocking.position.x = foot.position.x;
+    stocking.position.x = side * body.halfStanceM;
     stocking.scale.x = side;
     stocking.renderOrder = 2;
     textile.add(stocking);

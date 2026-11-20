@@ -18,7 +18,7 @@ function ellipsoid(x, y, z, rx, ry, rz) {
 }
 
 export function createFootField(anatomy, leg) {
-  const { sections, toes, ankleBase, skinJoinM } = anatomy;
+  const { sections, toes, ankleBase, malleoli, skinJoinM } = anatomy;
   const limit = leg.section(skinJoinM).y;
   const interval = 0.001;
   const size = Math.ceil((sections.at(-1)[0] - sections[0][0]) / interval);
@@ -74,6 +74,11 @@ export function createFootField(anatomy, leg) {
       const v = (z - a[1] - (b[1] - a[1]) * t) / rz;
       const tube = Math.max((Math.sqrt(u * u + v * v) - 1) * Math.min(rx, rz), 0.018 - y);
       distance = smoothUnion(distance, tube, 0.011 * blend(y, 0.012, 0.025) * (1 - blend(y, 0.096, 0.132)));
+    }
+    if (y > 0.043 && y < 0.098 && z > -0.035 && z < 0.009) {
+      for (const [cx, cy, cz, rx, ry, rz] of malleoli) {
+        distance = smoothUnion(distance, ellipsoid(x - cx, y - cy, z - cz, rx, ry, rz), 0.004);
+      }
     }
     return Math.max(distance, 0.0018 - y);
   }

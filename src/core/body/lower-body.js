@@ -1,87 +1,131 @@
 import { BufferGeometry, Float32BufferAttribute } from 'three/webgpu';
-import { interpolate } from './swept-surface.js';
+import { createImplicitMesh } from './implicit-mesh.js';
+import { createPelvisField } from './pelvis-field.js';
 
 const tau = 2 * Math.PI;
-const smooth = value => value * value * (3 - 2 * value);
 const mix = (a, b, t) => a + (b - a) * t;
 
-export function createLowerBodyGeometry(surface, startArc, config) {
-  const { halfStanceM, thighJoinArc, waistSections, crotchDropM, crotchForwardM, navel } = config;
-  const columns = 72, half = columns / 2;
-  const positions = [], indices = [];
-  const joined = [];
-  const hipY = waistSections[0][0], waistY = waistSections.at(-1)[0];
-  const [hipWidth, hipCenterZ, hipDepth] = waistSections[0].slice(1);
-  const signed = (point, side) => [side * (point[0] + halfStanceM), point[1], point[2]];
-  const append = point => (positions.push(...point) / 3) - 1;
+export function createLowerBodyGeometry(surface, foot, startArc, config) {
+  const { halfStanceM, joinArc, pelvisSections, skinPitchM } = config;
+  const upper = createPelvisField(surface, config);
+  const halfWidth = Math.max(...pelvisSections.map(section => section[1]));
+  const pelvis = createImplicitMesh(upper.sample,
+    [-halfWidth - 0.032, upper.startY, -0.166],
+    [halfWidth + 0.032, upper.topY, 0.124], skinPitchM);
+  const positions = [...pelvis.getAttribute('position').array];
+  const normals = [...pelvis.getAttribute('normal').array];
+  const indices = [...pelvis.getIndex().array];
+  pelvis.dispose();
+  const join = surface.section(joinArc);
+  const ankle = surface.section(startArc);
+  const footPositions = foot.getAttribute('position');
+  const footNormals = foot.getAttribute('normal');
+  const footIndices = foot.getIndex().array;
+  const columns = 72, rows = 138;
+  const waist = [], boundaries = { 1: [], [-1]: [] };
 
-  function stitch(a, b, reverse = false) {
-    for (let column = 0; column < a.length; column++) {
-      const next = (column + 1) % a.length;
-      if (reverse) indices.push(a[column], b[column], a[next], a[next], b[column], b[next]);
-      else indices.push(a[column], a[next], b[column], a[next], b[next], b[column]);
+  // Find the two open rims at the horizontal thigh sections and the cut at the navel.
+  for (let id = 0; id < positions.length / 3; id++) {
+    const [x, y, z] = positions.slice(id * 3, id * 3 + 3);
+    if (Math.abs(y - upper.topY) < 1e-7) {
+      const top = pelvisSections.at(-1);
+      waist.push({ id, angle: polar(x, z - (top[2] + top[3]) / 2) });
+    }
+    if (Math.abs(y - upper.startY) < 1e-7) {
+      const side = x >= 0 ? 1 : -1;
+      const angle = polar((side * x - halfStanceM - join.x) / join.width, (z - join.z) / join.depth);
+      boundaries[side].push({ id, angle });
     }
   }
 
-  const medial = column => column === 0 || column >= half;
-  const loop = callback => Array.from({ length: columns }, (_, column) => callback(column, tau * column / columns));
-  const hips = [1, -1].map(side => {
-    let previous = null;
-    for (let row = 0; row <= 160; row++) {
-      const arc = mix(startArc, thighJoinArc, row / 160);
-      const ring = loop((_, angle) => append(signed(surface.point(arc, angle), side)));
-      if (previous) stitch(previous, ring, side < 0);
-      previous = ring;
+  function append(point, normal) {
+    normals.push(...normal);
+    return (positions.push(...point) / 3) - 1;
+  }
+
+  const face = (a, b, c, side) => {
+    if (side > 0) indices.push(a, b, c);
+    else indices.push(a, c, b);
+  };
+  const angularRing = ids => ids.map((id, column) => ({ id, angle: tau * column / ids.length }));
+  for (const side of [1, -1]) {
+    const footOffset = positions.length / 3;
+    const ankleRim = [];
+    for (let i = 0; i < footPositions.count; i++) {
+      const x = footPositions.getX(i), y = footPositions.getY(i), z = footPositions.getZ(i);
+      const onRim = Math.abs(y - ankle.y) < 1e-7;
+      const angle = onRim ? polar((x - ankle.x) / ankle.width, (z - ankle.z) / ankle.depth) : 0;
+      const [nx, ny, nz] = onRim ? surface.normal(startArc, angle)
+        : [footNormals.getX(i), footNormals.getY(i), footNormals.getZ(i)];
+      const id = append([side * (halfStanceM + x), y, z], [side * nx, ny, nz]);
+      if (onRim) ankleRim.push({ id, angle });
     }
-    for (let row = 1; row <= 32; row++) {
-      const t = row / 32;
-      const ring = loop((column, angle) => {
-        // Both inner thighs share the same sagittal seam. The outer arcs join the pelvis.
-        if (row === 32 && side < 0 && medial(column)) return joined[column];
-        const sine = Math.sin(angle), cosine = Math.cos(angle);
-        const start = signed(surface.point(thighJoinArc, angle), side);
-        const above = signed(surface.point(thighJoinArc + 0.045 * t, angle), side);
-        const blend = smooth(t);
-        // Approach the shared seam laterally so the two halves meet with a continuous tangent.
-        const inner = 1 - smooth(Math.max(0, Math.min(1, sine / 0.50)));
-        const lateral = blend - 0.8 * inner * t * t * (1 - t);
-        const rise = t + inner * t * t * (1 - t);
-        const saddle = Math.min(0, sine) ** 2;
-        const id = append([
-          mix(above[0], medial(column) ? 0 : side * hipWidth * sine, lateral),
-          mix(start[1], hipY - saddle * crotchDropM, rise),
-          mix(above[2], hipCenterZ + hipDepth * cosine + saddle * crotchForwardM, blend)
-        ]);
-        if (row === 32 && side > 0 && medial(column)) joined[column] = id;
-        return id;
+    for (let i = 0; i < footIndices.length; i += 3) {
+      face(footOffset + footIndices[i], footOffset + footIndices[i + 1], footOffset + footIndices[i + 2], side);
+    }
+    ankleRim.sort((a, b) => a.angle - b.angle);
+    let previous;
+    for (let row = 1; row < rows; row++) {
+      const arc = mix(startArc, joinArc, row / rows);
+      const ring = Array.from({ length: columns }, (_, column) => {
+        const angle = tau * column / columns;
+        const [x, y, z] = surface.point(arc, angle);
+        const [nx, ny, nz] = surface.normal(arc, angle);
+        return append([side * (halfStanceM + x), y, z], [side * nx, ny, nz]);
       });
-      stitch(previous, ring, side < 0);
+      if (previous) {
+        for (let col = 0; col < columns; col++) {
+          const next = (col + 1) % columns;
+          face(previous[col], previous[next], ring[col], side);
+          face(previous[next], ring[next], ring[col], side);
+        }
+      } else stitchRings(ankleRim, angularRing(ring), (a, b, c) => face(a, b, c, side));
       previous = ring;
     }
-    return previous;
-  });
+    const boundary = boundaries[side].sort((a, b) => a.angle - b.angle);
+    if (boundary.length < columns) throw Error('The upper thigh surface did not produce a continuous rim.');
+    for (const { id, angle } of boundary) {
+      const [nx, ny, nz] = surface.normal(joinArc, angle);
+      normals[id * 3] = side * nx;
+      normals[id * 3 + 1] = ny;
+      normals[id * 3 + 2] = nz;
+    }
+    stitchRings(angularRing(previous), boundary, (a, b, c) => face(a, b, c, side));
+  }
 
-  let previous = [...hips[0].slice(0, half + 1), ...hips[1].slice(1, half).reverse()];
-  for (let row = 1; row <= 52; row++) {
-    const y = mix(hipY, waistY, row / 52);
-    const [width, centerZ, depth] = interpolate(waistSections, y);
-    const ring = loop((_, angle) => {
-      const x = width * Math.sin(angle), front = Math.cos(angle);
-      const dimple = navel.depthM * Math.max(0, front)
-        * Math.exp(-((x / navel.widthM) ** 2) - (((y - navel.yM) / navel.heightM) ** 2));
-      return append([x, y, centerZ + depth * front - dimple]);
-    });
-    stitch(previous, ring);
-    previous = ring;
-  }
-  const top = append([0, waistY, waistSections.at(-1)[2]]);
-  for (let column = 0; column < columns; column++) {
-    indices.push(top, previous[column], previous[(column + 1) % columns]);
-  }
+  const top = pelvisSections.at(-1);
+  const center = append([0, upper.topY, (top[2] + top[3]) / 2], [0, 1, 0]);
+  waist.sort((a, b) => a.angle - b.angle);
+  for (let i = 0; i < waist.length; i++) indices.push(center, waist[i].id, waist[(i + 1) % waist.length].id);
 
   const geometry = new BufferGeometry();
   geometry.setIndex(indices);
   geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
-  geometry.computeVertexNormals();
+  geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
   return geometry;
+}
+
+function polar(x, z) {
+  return (Math.atan2(x, z) + tau) % tau;
+}
+
+function stitchRings(lower, upper, face) {
+  if (!lower.length || !upper.length) throw Error('A skin surface did not produce a complete seam.');
+  let lowerStep = 0, upperStep = 0;
+  let a = lower.at(-1).id, b = upper.at(-1).id;
+  while (lowerStep < lower.length || upperStep < upper.length) {
+    const nextLowerAngle = lower[lowerStep]?.angle ?? Infinity;
+    const nextUpperAngle = upper[upperStep]?.angle ?? Infinity;
+    if (nextLowerAngle <= nextUpperAngle) {
+      const next = lower[lowerStep].id;
+      face(a, next, b);
+      a = next;
+      lowerStep++;
+    } else {
+      const next = upper[upperStep].id;
+      face(a, next, b);
+      b = next;
+      upperStep++;
+    }
+  }
 }

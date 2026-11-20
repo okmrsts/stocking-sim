@@ -1,0 +1,162 @@
+{
+  "browser": "151.0.7922.34",
+  "topology": {
+    "components": 1,
+    "openEdges": 0,
+    "nonManifoldEdges": 0,
+    "inconsistentEdges": 0
+  },
+  "measurements": {
+    "navelHeightMm": 924.8827653151005,
+    "navelSectionDepthMm": 169.0882025000821,
+    "hipBreadthMm": 330.8834092581904,
+    "hipDepthMm": 206.31626298971588,
+    "crotchHeightMm": 714.5964322991917,
+    "thighBreadthMm": 163.38537358625538,
+    "thighDepthMm": 180.67864335580558,
+    "thighCircumferenceMm": 540.7691159786264,
+    "kneeDepthMm": 115.81387969438862,
+    "calfDepthMm": 105.44275971768336,
+    "calfCircumferenceMm": 351.1149531208992,
+    "footLengthMm": 233.80964249372482,
+    "footBreadthMm": 93.67912262678146
+  },
+  "cuffs": {
+    "compressionMm": 5.227909915732265,
+    "pressurePa": 5044.5634765625
+  },
+  "foot": {
+    "clothWidthMm": 97.22954034805298,
+    "skinWidthMm": 93.67912262678146,
+    "tipOverhangMm": 1.6519874334335327,
+    "triangleCenters": {
+      "samples": 16320,
+      "insideSkin": 0,
+      "minFieldMm": 0.13634364317375203,
+      "closestPointM": [
+        0.03514239316185316,
+        0.006766058504581451,
+        0.11754219233989716
+      ]
+    }
+  },
+  "positionsFinite": true,
+  "opacity": {
+    "thigh": 0.2106001267762987,
+    "ankle": 0.23684337652931486,
+    "tensionCorrelation": -0.3138307552696637
+  },
+  "runtime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "front": {
+    "fps": 4.647320045440463,
+    "durationMs": 9683,
+    "medianMs": 166.6999999999971,
+    "p95Ms": 516.6000000000058,
+    "samples": 45,
+    "width": 1440,
+    "height": 1080
+  },
+  "macro": {
+    "fps": 3.4135647477375657,
+    "durationMs": 13182.699999999997,
+    "medianMs": 283.3999999999942,
+    "p95Ms": 316.6999999999971,
+    "samples": 45,
+    "width": 1440,
+    "height": 1080
+  },
+  "meshes": [
+    {
+      "id": "low",
+      "points": 9061,
+      "renderPoints": 9062,
+      "triangles": 17640,
+      "prepareMs": 67.39999999990687,
+      "medianMs": 3.5,
+      "p95Ms": 3.7000000001862645,
+      "samples": 9,
+      "footFit": {
+        "clothWidthMm": 97.16423973441124,
+        "skinWidthMm": 93.67912262678146,
+        "tipOverhangMm": 1.6513913869857788,
+        "triangleCenters": {
+          "samples": 6400,
+          "insideSkin": 0,
+          "minFieldMm": -0.049279065375648405,
+          "closestPointM": [
+            0.04461048419276873,
+            0.011246046361823877,
+            0.14494445423285165
+          ]
+        }
+      }
+    },
+    {
+      "id": "standard",
+      "points": 22945,
+      "renderPoints": 22946,
+      "triangles": 45120,
+      "prepareMs": 222.79999999981374,
+      "medianMs": 7,
+      "p95Ms": 7.600000000093132,
+      "samples": 9,
+      "footFit": {
+        "clothWidthMm": 97.22954034805298,
+        "skinWidthMm": 93.67912262678146,
+        "tipOverhangMm": 1.6519874334335327,
+        "triangleCenters": {
+          "samples": 16320,
+          "insideSkin": 0,
+          "minFieldMm": 0.13634364317375203,
+          "closestPointM": [
+            0.03514239316185316,
+            0.006766058504581451,
+            0.11754219233989716
+          ]
+        }
+      }
+    },
+    {
+      "id": "high",
+      "points": 43165,
+      "renderPoints": 43166,
+      "triangles": 85272,
+      "prepareMs": 254.10000000009313,
+      "medianMs": 12,
+      "p95Ms": 13.299999999813735,
+      "samples": 9,
+      "footFit": {
+        "clothWidthMm": 97.22089022397995,
+        "skinWidthMm": 93.67912262678146,
+        "tipOverhangMm": 1.652047038078308,
+        "triangleCenters": {
+          "samples": 30888,
+          "insideSkin": 0,
+          "minFieldMm": 0.10093404950303721,
+          "closestPointM": [
+            0.03621787950396538,
+            0.007155845562616984,
+            0.11738957713047664
+          ]
+        }
+      }
+    }
+  ],
+  "runtimeAfterBenchmarks": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  }
+}

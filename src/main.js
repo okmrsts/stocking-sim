@@ -63,7 +63,7 @@ export async function start() {
   renderer.toneMapping = NeutralToneMapping;
   renderer.toneMappingExposure = 0.84;
 
-  const response = await fetch(new URL('../checks/views-1a-bilateral.json', import.meta.url));
+  const response = await fetch(new URL('../checks/views-1a-anatomy.json', import.meta.url));
   if (!response.ok) throw new Error('視点の設定を読み込めません。');
   const { views, defaultView } = await response.json();
   const bareLeg = createLeg(bodyProfile, footAnatomy);
@@ -95,11 +95,11 @@ export async function start() {
   const geometry = createClothGeometry(frame);
   const unloadedGeometry = createUnloadedGeometry(frame);
   const foot = bareLeg.createFootGeometry();
-  const skinStart = footAnatomy.skinJoinM - 0.0012;
+  const skinStart = footAnatomy.skinJoinM;
   const body = {
     foot, halfStanceM: lowerBodyConfig.halfStanceM,
-    bare: createLowerBodyGeometry(bareLeg.skinSurface, skinStart, lowerBodyConfig),
-    loaded: createLowerBodyGeometry(wrapCompliantSurface(bareLeg.skinSurface, tissueField), skinStart, lowerBodyConfig)
+    bare: createLowerBodyGeometry(bareLeg.skinSurface, foot, skinStart, lowerBodyConfig),
+    loaded: createLowerBodyGeometry(wrapCompliantSurface(bareLeg.skinSurface, tissueField), foot, skinStart, lowerBodyConfig)
   };
   const { scene, textile, unloaded, setSkinLoaded, setClothGeometry } = createStudio(
     renderConfig, body, geometry, unloadedGeometry, cloth.material

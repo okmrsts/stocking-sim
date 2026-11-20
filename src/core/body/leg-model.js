@@ -7,11 +7,17 @@ const gaussian = (value, center, width) => Math.exp(-Math.pow((value - center) /
 
 export function createLeg(profile, anatomy) {
   const skinSurface = createSweptSurface(profile, (arc, angle) => {
-    const ankleBone = 0.093 * gaussian(arc, 0.273 + 0.008 * Math.sin(angle), 0.022) * Math.pow(Math.sin(angle), 6);
-    const calf = 0.056 * gaussian(arc, 0.48, 0.10) * Math.sin(2 * angle);
-    const knee = 0.062 * gaussian(arc, 0.626, 0.035) * Math.pow(Math.max(0, Math.cos(angle)), 5);
-    const shin = 0.031 * gaussian(arc, 0.455, 0.13) * Math.pow(Math.max(0, Math.cos(angle)), 10);
-    return 1 + ankleBone + calf + knee + shin;
+    const sine = Math.sin(angle), cosine = Math.cos(angle);
+    const front = Math.max(0, cosine), rear = Math.max(0, -cosine);
+    const gastrocnemius = rear ** 2 * (
+      0.055 * gaussian(arc, 0.516, 0.063) * gaussian(sine, -0.43, 0.38)
+      + 0.043 * gaussian(arc, 0.536, 0.055) * gaussian(sine, 0.43, 0.40)
+    );
+    const patella = 0.115 * gaussian(arc, 0.606, 0.027) * front ** 12;
+    const poplitealFossa = 0.023 * gaussian(arc, 0.610, 0.029) * rear ** 16;
+    const tibia = 0.039 * gaussian(arc, 0.449, 0.127) * front ** 16;
+    const vastusMedialis = 0.026 * gaussian(arc, 0.672, 0.041) * front ** 2 * gaussian(sine, -0.54, 0.32);
+    return 1 + gastrocnemius + patella - poplitealFossa + tibia + vastusMedialis;
   });
   const foot = createFootField(anatomy, skinSurface);
   return {
