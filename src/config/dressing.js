@@ -1,5 +1,6 @@
 export const dressingConfig = Object.freeze({
-  seconds: 4.4, travelStep: 0.012, clearSweep: 0.19, insertionArcM: -0.036,
+  seconds: 4.4, travelStep: 0.015, quickFactor: 1.7,
+  slantArcM: 0.011, slantChangePerS: 4.5, clearSweep: 0.19, insertionArcM: -0.036,
   packedLengthRatio: 0.24, packingSpanM: 0.095, bodyClearanceM: 0.003,
   seatToeArcM: 0.091, gatherSpanM: 0.064, gatherHeightM: 0.0024,
   detachedDepthM: 0.32, drapeWidthRatio: 0.27, foldPitchM: 0.203, lateralFoldM: 0.039,

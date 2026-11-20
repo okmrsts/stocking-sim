@@ -73,6 +73,15 @@
           <input type="range" id="dressing-progress" min="0" max="1000" value="1000">
           <output id="dressing-position">着用中</output>
         </label>
+        <div class="pull-options">
+          <label for="pull-direction">引く方向</label>
+          <select id="pull-direction">
+            <option value="0">まっすぐ</option>
+            <option value="1">外側へ斜め</option>
+            <option value="-1">内側へ斜め</option>
+          </select>
+          <label><input type="checkbox" id="quick-pull"> 速く引く</label>
+        </div>
         <label class="arrangement">表示
           <select id="dressing-arrangement">
             <option value="together">着脱を表示</option>

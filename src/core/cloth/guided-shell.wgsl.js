@@ -17,6 +17,7 @@ struct Knobs {
   clock: vec4<u32>,
   physics: vec4<f32>,
   packing: vec4<f32>,
+  pull: vec4<f32>,
 }
 struct Result {
   position: vec4<f32>,
@@ -58,7 +59,7 @@ fn parked(node: Node) -> vec3<f32> {
   let hasChain = config.motion.x == 0.0 || config.motion.w > 0.0;
   let centre = select(hangingStart(lengthM), chain, hasChain);
   let sway = lateral(lengthM);
-  return vec3<f32>(nodes[0].fitted.x + node.rest.x * 1.28 + sway,
+  return vec3<f32>(0.5 * nodes[0].fitted.x + node.rest.x * 1.28 + sway,
     centre.x + node.rest.z * config.drape.y, centre.y);
 }
 
@@ -77,7 +78,10 @@ fn advance(@builtin(global_invocation_id) id: vec3<u32>) {
   let gatherU = clamp((node.fitted.w - gatherStart) / (config.motion.z - gatherStart), 0.0, 1.0);
   let seatedArc = select(node.fitted.w, mix(gatherStart, max(0.0, frontArc), gatherU),
     node.fitted.w >= gatherStart);
-  let arc = mix(frontArc + node.fitted.w - config.motion.z, seatedArc, seated);
+  let slant = config.pull.x * config.pull.y * sin(node.normal.w)
+    * smoothstep(0.10, 0.23, pulled) * (1.0 - smoothstep(0.80, 1.0, pulled))
+    * gatherU;
+  let arc = mix(frontArc + node.fitted.w - config.motion.z, seatedArc, seated) + slant;
   let slack = config.fit.w * (1.0 - smoothstep(0.79, 1.0, pulled));
   let gathered = config.packing.z * seated * (1.0 - smoothstep(0.72, 1.0, pulled))
     * smoothstep(0.0, 0.24, gatherU) * (0.5 - 0.5 * cos(tau * gatherU * 4.0 + 0.40 * sin(node.normal.w)));

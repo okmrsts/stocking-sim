@@ -113,6 +113,8 @@ export async function start() {
   const dressingProgress = document.getElementById('dressing-progress');
   const dressingPosition = document.getElementById('dressing-position');
   const dressingArrangement = document.getElementById('dressing-arrangement');
+  const pullDirection = document.getElementById('pull-direction');
+  const quickPull = document.getElementById('quick-pull');
   let draggingProgress = false;
   const dressing = createDressingPlayer({
     device, getFitting: () => fitting, onError: reportError,
@@ -165,6 +167,12 @@ export async function start() {
     requestDraw();
   }
 
+  function setPull() {
+    if (!measuring) dressing.pull(Number(pullDirection.value), quickPull.checked);
+  }
+  pullDirection.addEventListener('change', setPull);
+  quickPull.addEventListener('change', setPull);
+
   dressingOpen.addEventListener('click', () => {
     if (measuring) return;
     if (dressingControls.hidden) enterDressing();
@@ -184,12 +192,14 @@ export async function start() {
       arrangement = 'together';
       setView('dressing');
       updateArrangement();
+      setPull();
       dressing.move(target, id);
     });
   }
   document.getElementById('pause-dressing').addEventListener('click', () => dressing.pause());
   dressingProgress.addEventListener('input', () => {
     if (measuring) return;
+    setPull();
     dressing.move(Number(dressingProgress.value) / 1000, 'scrub');
   });
   dressingProgress.addEventListener('pointerdown', () => { draggingProgress = true; });
@@ -413,6 +423,8 @@ export async function start() {
       setBody(next.body);
       setClothGeometry(next.geometry, next.joined);
       dressing.reset();
+      pullDirection.value = '0';
+      quickPull.checked = false;
       if (garment.upper) {
         dressingControls.hidden = true;
         dressingOpen.setAttribute('aria-expanded', 'false');
@@ -514,7 +526,7 @@ export async function start() {
       viewMode.disabled = false;
       setView(restoreView);
       setDisplay(restoreDisplay);
-      if (restoreMotion) await dressing.inspect(restoreMotion.progress, restoreMotion.settling);
+      if (restoreMotion) await dressing.inspect(restoreMotion.progress, restoreMotion.settling, restoreMotion.slant);
       setBarefoot(restoreBarefoot);
       if (restoreArrangement !== 'together') {
         arrangement = restoreArrangement;
@@ -553,7 +565,7 @@ export async function start() {
     const { frame, surface, body, geometry, tissueField, initial, dimensions } = fitting;
     window.stockingStage1a = {
       result, setView, setDisplay, setBarefoot, setTissueVisible, profileView, meshBenchmarks, unloadedGeometry,
-      dressing: { inspect: dressing.inspect, move: dressing.move, pause: dressing.pause, status: dressing.status },
+      dressing: { inspect: dressing.inspect, move: dressing.move, pull: dressing.pull, pause: dressing.pause, status: dressing.status },
       surface,
       applyBody, applyGarment, dimensions, garment: fitting.garment.id, yarn, joined: fitting.joined,
       ...collectFitMetrics(frame, surface, optics, yarn.radiusM),

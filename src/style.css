@@ -49,6 +49,9 @@ canvas:active { cursor: grabbing; }
 .travel-label { display: grid; grid-template-columns: auto minmax(60px, 1fr) 7ch; gap: 12px; align-items: center; }
 .travel-label input { width: 100%; min-height: 32px; accent-color: #355e68; }
 .travel-label output { text-align: end; }
+.pull-options { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.pull-options select { min-height: 34px; }
+.pull-options input { accent-color: #355e68; }
 .arrangement { display: flex; align-items: center; gap: 10px; }
 button, select {
   font: inherit; color: inherit; border: 1px solid var(--line);
@@ -87,7 +90,7 @@ dialog select { display: block; width: 100%; margin: 5px 0 12px; }
   .toolbar button, .subviews button { min-height: 38px; padding-inline: 8px; }
   .dressing-controls { font-size: .75rem; }
   .dressing-actions button { min-height: 38px; padding-inline: 8px; }
-  .viewer:has(.dressing-controls:not([hidden])) .stage { height: clamp(220px, calc(100svh - 326px), 720px); }
+  .viewer:has(.dressing-controls:not([hidden])) .stage { height: clamp(205px, calc(100svh - 364px), 720px); }
   #settings-open { margin-inline-start: 0; }
   dialog { width: 100%; max-width: 100%; margin: auto 0 0; padding-bottom: max(18px, env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
 }

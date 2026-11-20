@@ -1,6 +1,7 @@
 import { dressingConfig } from '../config/dressing.js';
 import { material } from '../config/stage1a.js';
 import { createClothGeometry, updateClothGeometry } from '../core/cloth/geometry.js';
+import { createSweptSelfClient } from '../core/geometry/swept-self-client.js';
 import { createSweptVertexTest } from '../core/geometry/swept-vertices.js';
 import { createGuidedShell } from '../core/cloth/guided-shell.js';
 import { createDressingInput } from './dressing-input.js';
@@ -21,6 +22,10 @@ export function createDressingPlayer({ device, getFitting, show, onBlocked, onEr
   let lastCrossing = -1;
   let frameIntervals = [];
   let pickupTime = 0;
+  let slant = 0, targetSlant = 0, speed = 1;
+  let selfStops = 0, checkedSteps = 0;
+  let lastSelfFaces = null;
+  const contactMs = [];
 
   async function prepare() {
     if (resources) return resources;
@@ -31,9 +36,20 @@ export function createDressingPlayer({ device, getFitting, show, onBlocked, onEr
         const relaxed = createUnloadedGeometry(frame);
         try {
           const input = createDressingInput(frame, fitting.surface, relaxed);
-          const solver = await createGuidedShell(device, input, dressingConfig, material);
+          const stride = frame.columns + 1;
+          const geometry = createClothGeometry(frame);
           const test = createSweptVertexTest(fitting.body.loaded, fitting.body.halfStanceM);
-          resources = { frame, solver, geometry: createClothGeometry(frame), test };
+          const selfTest = await createSweptSelfClient(geometry,
+            id => id < frame.points && id % stride === frame.columns ? id - frame.columns : id);
+          try {
+            const solver = await createGuidedShell(device, input, dressingConfig, material);
+            const candidatePositions = new Float32Array((frame.points + 1) * 3);
+            resources = { frame, solver, geometry, test, selfTest, candidatePositions };
+          } catch (error) {
+            selfTest.dispose();
+            geometry.dispose();
+            throw error;
+          }
           return resources;
         } finally {
           relaxed.dispose();
@@ -44,24 +60,46 @@ export function createDressingPlayer({ device, getFitting, show, onBlocked, onEr
     return preparation;
   }
 
-  async function render(value, elapsed, guard = false, fps = 0) {
+  async function render(value, elapsed, direction, guard = false, fps = 0) {
     const fitting = getFitting();
     if (!guard && value === 1) {
       show(fitting.geometry, value, elapsed);
       return true;
     }
-    const { frame, solver, geometry, test } = await prepare();
+    const { frame, solver, geometry, test, selfTest, candidatePositions } = await prepare();
     const full = value === 1;
-    const state = full ? frame.state : await solver.sample(value, elapsed);
-    if (guard && value !== progress) {
+    const state = full ? frame.state : await solver.sample(value, elapsed, direction);
+    if (guard) {
+      const begin = performance.now();
       const prior = progress === 1 ? fitting.geometry : geometry;
-      const positions = prior.getAttribute('position').array.subarray(0, frame.points * 3);
-      const crossing = test(positions, state, 16);
-      if (crossing >= 0) {
+      const positions = prior.getAttribute('position').array;
+      const toe = frame.points * 3;
+      candidatePositions.fill(0, toe);
+      let acrossCentre = false;
+      for (let i = 0; i < frame.points; i++) {
+        for (let axis = 0; axis < 3; axis++) {
+          const coordinate = state[i * 16 + axis];
+          candidatePositions[i * 3 + axis] = coordinate;
+          if (i < frame.columns) candidatePositions[toe + axis] += coordinate / frame.columns;
+        }
+        acrossCentre ||= candidatePositions[i * 3] + fitting.body.halfStanceM <= 0;
+      }
+      const crossing = test(positions, candidatePositions, 3);
+      const ordered = progress === 0 && value === 0
+        && orderedDrape(positions, frame) && orderedDrape(candidatePositions, frame);
+      const touching = crossing < 0 && (acrossCentre || (!ordered && await selfTest.firstContact(positions, candidatePositions)));
+      contactMs.push(performance.now() - begin);
+      if (contactMs.length > 120) contactMs.shift();
+      if (crossing >= 0 || touching) {
         lastCrossing = crossing;
-        collisionStops++;
+        if (crossing >= 0) collisionStops++;
+        else {
+          lastSelfFaces = touching === true ? 'mirror-plane' : touching;
+          selfStops++;
+        }
         return false;
       }
+      checkedSteps++;
     }
     if (!full) updateClothGeometry(geometry, frame, state);
     show(full ? fitting.geometry : geometry, value, elapsed, fps);
@@ -79,33 +117,40 @@ export function createDressingPlayer({ device, getFitting, show, onBlocked, onEr
     const fps = frameIntervals.length > 2 ? 1000 * frameIntervals.length / frameIntervals.reduce((a, b) => a + b, 0) : 0;
     const dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 1 / 60;
     lastTime = now;
-    const step = Math.min(dressingConfig.travelStep, dt / dressingConfig.seconds);
+    const step = Math.min(dressingConfig.travelStep, dt * speed / dressingConfig.seconds);
+    const directionStep = Math.min(Math.abs(slant - targetSlant), dt * dressingConfig.slantChangePerS);
+    const nextSlant = directionStep === Math.abs(slant - targetSlant) ? targetSlant
+      : slant + Math.sign(targetSlant - slant) * directionStep;
     const delta = target - progress;
     const next = Math.abs(delta) <= step ? target : progress + Math.sign(delta) * step;
     const elapsed = next > 0 ? 0 : Math.min(dressingConfig.settleSeconds, settling + dt);
     inFlight = (async () => {
       try {
-        let candidate = next;
+        let candidate = next, direction = nextSlant;
         for (let attempt = 0; attempt < 4; attempt++) {
           const time = candidate === 0 ? elapsed : candidate < dressingConfig.clearSweep ? pickupTime : 0;
-          if (await render(candidate, time, true, fps)) {
+          if (await render(candidate, time, direction, true, fps)) {
             progress = candidate;
+            slant = direction;
             settling = candidate === 0 ? time : 0;
             if (candidate >= dressingConfig.clearSweep) pickupTime = 0;
             return;
           }
           candidate = (candidate + progress) / 2;
+          direction = (direction + slant) / 2;
         }
         target = progress;
+        targetSlant = slant;
         onBlocked();
       } catch (error) {
         target = progress;
+        targetSlant = slant;
         settling = dressingConfig.settleSeconds;
         onError('着脱', error);
       }
     })().finally(() => {
       inFlight = undefined;
-      if (target !== progress || (progress === 0 && settling < dressingConfig.settleSeconds)) queue();
+      if (target !== progress || targetSlant !== slant || (progress === 0 && settling < dressingConfig.settleSeconds)) queue();
       else lastTime = 0;
     });
   }
@@ -119,24 +164,34 @@ export function createDressingPlayer({ device, getFitting, show, onBlocked, onEr
     queue();
   }
 
+  function pull(direction, quick) {
+    targetSlant = Math.max(-1, Math.min(1, direction));
+    speed = quick ? dressingConfig.quickFactor : 1;
+    if (progress === 0 || progress === 1) slant = targetSlant;
+    if (!frozen && (target !== progress || targetSlant !== slant)) queue();
+  }
+
   async function pause() {
     frozen = true;
     cancelAnimationFrame(animation);
     animation = 0;
     await inFlight;
     target = progress;
+    targetSlant = slant;
     lastTime = 0;
   }
 
-  async function inspect(value, elapsed = dressingConfig.settleSeconds) {
+  async function inspect(value, elapsed = dressingConfig.settleSeconds, direction = slant) {
     await pause();
-    await render(value, elapsed);
+    await render(value, elapsed, direction);
+    targetSlant = slant = direction;
     target = progress = value;
     settling = elapsed;
   }
 
   function reset() {
     resources?.solver.dispose();
+    resources?.selfTest.dispose();
     resources?.geometry.dispose();
     resources = null;
     target = progress = 1;
@@ -144,8 +199,31 @@ export function createDressingPlayer({ device, getFitting, show, onBlocked, onEr
     pickupTime = 0;
     collisionStops = 0;
     lastCrossing = -1;
+    targetSlant = slant = 0;
+    speed = 1;
+    selfStops = checkedSteps = 0;
+    lastSelfFaces = null;
+    contactMs.length = 0;
   }
 
-  return { move, pause, inspect, reset, active: () => Boolean(inFlight || animation),
-    status: () => ({ progress, target, action, settling, collisionStops, lastCrossing, frameIntervals: [...frameIntervals] }) };
+  return { move, pull, pause, inspect, reset, active: () => Boolean(inFlight || animation),
+    status: () => ({ progress, target, action, settling, collisionStops, lastCrossing, selfStops,
+      lastSelfFaces, checkedSteps, slant, contactMs: [...contactMs], frameIntervals: [...frameIntervals] }) };
+}
+
+// The unshifted drape keeps each elliptical section in a fixed-Z plane.
+// A strict order at both endpoints separates the strips throughout the step.
+function orderedDrape(positions, { rows, columns }) {
+  const stride = columns + 1;
+  let previous = Infinity;
+  for (let row = 0; row <= rows; row++) {
+    const i = row * stride * 3;
+    const depth = positions[i + 2];
+    if (!(depth < previous)) return false;
+    for (let column = 1; column <= columns; column++) {
+      if (positions[i + 3 * column + 2] !== depth) return false;
+    }
+    previous = depth;
+  }
+  return true;
 }

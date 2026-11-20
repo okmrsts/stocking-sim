@@ -1,0 +1,213 @@
+{
+  "chromium": "151.0.7922.34",
+  "fixed": {
+    "front": {
+      "fps": 4.451249910975006,
+      "durationMs": 5616.399999999994,
+      "medianMs": 200,
+      "p95Ms": 333.40000000000146,
+      "samples": 25,
+      "width": 1440,
+      "height": 1080
+    },
+    "macro": {
+      "fps": 3.144772758720456,
+      "durationMs": 7949.699999999997,
+      "medianMs": 316.6999999999971,
+      "p95Ms": 333.40000000000146,
+      "samples": 25,
+      "width": 1440,
+      "height": 1080
+    }
+  },
+  "poses": [
+    {
+      "progress": 1,
+      "direction": 0,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.31,
+      "direction": 1,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.43,
+      "direction": 1,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.72,
+      "direction": 1,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.31,
+      "direction": -1,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.43,
+      "direction": -1,
+      "footCentres": 45120,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0.72,
+      "direction": -1,
+      "footCentres": 16320,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    },
+    {
+      "progress": 0,
+      "direction": 0,
+      "footCentres": 0,
+      "insideFoot": 0,
+      "selfCrossings": 0,
+      "samples": []
+    }
+  ],
+  "desktopGpu": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "errors": [],
+  "playback": {
+    "outward": {
+      "progress": 0.43,
+      "target": 0.43,
+      "action": "lower",
+      "settling": 0,
+      "collisionStops": 2,
+      "lastCrossing": 8025,
+      "selfStops": 0,
+      "lastSelfFaces": null,
+      "checkedSteps": 40,
+      "slant": 1,
+      "frameSamples": 39,
+      "fps": 2.753031864579069,
+      "recentContactSamples": 42,
+      "contactMedianMs": 74.6000000005588,
+      "contactP95Ms": 169.80000000074506,
+      "display": "43%",
+      "gpu": {
+        "errors": [],
+        "validationErrors": 0,
+        "revision": "185",
+        "adapter": {
+          "vendor": "google",
+          "architecture": "swiftshader"
+        }
+      }
+    },
+    "reversal": {
+      "progress": 0.5275000000000001,
+      "target": 0.5275000000000001,
+      "action": "dress",
+      "settling": 0,
+      "collisionStops": 5,
+      "lastCrossing": 5228,
+      "selfStops": 0,
+      "lastSelfFaces": null,
+      "checkedSteps": 49,
+      "slant": -0.5375000000000001,
+      "frameSamples": 47,
+      "fps": 2.9254143818350444,
+      "recentContactSamples": 54,
+      "contactMedianMs": 81.90000000037253,
+      "contactP95Ms": 210.09999999962747,
+      "display": "53%",
+      "gpu": {
+        "errors": [],
+        "validationErrors": 0,
+        "revision": "185",
+        "adapter": {
+          "vendor": "google",
+          "architecture": "swiftshader"
+        }
+      }
+    },
+    "inward": {
+      "progress": 0,
+      "target": 0,
+      "action": "remove",
+      "settling": 1.5,
+      "collisionStops": 54,
+      "lastCrossing": 22921,
+      "selfStops": 0,
+      "lastSelfFaces": null,
+      "checkedSteps": 133,
+      "slant": -1,
+      "frameSamples": 83,
+      "fps": 6.155991337110988,
+      "recentContactSamples": 120,
+      "contactMedianMs": 2.900000000372529,
+      "contactP95Ms": 146.80000000074506,
+      "display": "脱衣後",
+      "gpu": {
+        "errors": [],
+        "validationErrors": 0,
+        "revision": "185",
+        "adapter": {
+          "vendor": "google",
+          "architecture": "swiftshader"
+        }
+      }
+    },
+    "straight": {
+      "progress": 1,
+      "target": 1,
+      "action": "dress",
+      "settling": 0,
+      "collisionStops": 102,
+      "lastCrossing": 5228,
+      "selfStops": 0,
+      "lastSelfFaces": null,
+      "checkedSteps": 219,
+      "slant": 0,
+      "frameSamples": 85,
+      "fps": 5.4664488661941935,
+      "recentContactSamples": 120,
+      "contactMedianMs": 53.09999999962747,
+      "contactP95Ms": 138.5,
+      "display": "着用中",
+      "gpu": {
+        "errors": [],
+        "validationErrors": 0,
+        "revision": "185",
+        "adapter": {
+          "vendor": "google",
+          "architecture": "swiftshader"
+        }
+      }
+    }
+  },
+  "mobileViewport": [
+    390,
+    844
+  ]
+}

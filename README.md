@@ -22,6 +22,7 @@ WebGPU 専用の布シミュレーターを段階ごとに作ります。段階1
 | [src/](src/) | WebGPU初期化、脚の曲面、布計算、編み目、画面・設定 |
 | [checks/views-1a-anatomy.json](checks/views-1a-anatomy.json) | 下半身の固定五視点と側面・背面・臀部・足部・履き口 |
 | [checks/1b/](checks/1b/README.md) | 腰丈の3種類と固定視点の比較 |
+| [checks/2-contact/](checks/2-contact/README.md) | 斜めの着脱と連続判定の検証 |
 | [checks/2/](checks/2/README.md) | 着脱の写真と検証記録 |
 | [checks/0/](checks/0/) | 段階0の検証記録 |
 | [CHANGELOG.md](CHANGELOG.md) | 段階別の変更履歴 |

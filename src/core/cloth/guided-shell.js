@@ -16,7 +16,7 @@ export async function createGuidedShell(device, input, settings, material) {
   ));
   const bytes = frame.points * 64;
   const flags = GPUBufferUsage;
-  const controls = new ArrayBuffer(128);
+  const controls = new ArrayBuffer(144);
   new Uint32Array(controls).set([frame.points, frame.columns + 1, frame.rows, frame.points]);
   const counters = new Uint32Array(controls);
   counters[22] = settings.drapePoints;
@@ -30,6 +30,7 @@ export async function createGuidedShell(device, input, settings, material) {
   ], 4);
   uniforms.set([settings.drapeStepS, settings.floorClearanceM, settings.foldSpacingM, settings.drapeDamping], 24);
   uniforms.set([settings.seatToeArcM, settings.gatherSpanM, settings.gatherHeightM, settings.lateralFoldM], 28);
+  uniforms[33] = settings.slantArcM;
   const create = (size, usage) => device.createBuffer({ size, usage });
   const source = create(nodes.byteLength, flags.STORAGE | flags.COPY_DST);
   const predicted = create(frame.points * 16, flags.STORAGE);
@@ -46,9 +47,10 @@ export async function createGuidedShell(device, input, settings, material) {
 
   let previousStep = -1;
 
-  async function sample(progress, elapsed) {
+  async function sample(progress, elapsed, slant = 0) {
     uniforms[4] = progress;
     uniforms[7] = elapsed;
+    uniforms[32] = slant;
     const useChain = progress === 0 || elapsed > 0;
     const step = Math.round(elapsed / settings.drapeStepS);
     const reset = previousStep === -1 || step < previousStep;
