@@ -1,0 +1,334 @@
+{
+  "browser": "151.0.7922.34",
+  "platform": "linux x64",
+  "viewport": {
+    "width": 1440,
+    "height": 1080
+  },
+  "deviceScaleFactor": 1,
+  "chromeArgs": [
+    "--enable-unsafe-webgpu",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader",
+    "--enable-features=Vulkan,SkiaGraphite,DawnUseSwiftShader",
+    "--use-vulkan=swiftshader",
+    "--disable-vulkan-surface"
+  ],
+  "cdn": "cached-jsdelivr-response",
+  "mobileLayout": {
+    "overflows": false,
+    "closed": true,
+    "selectedView": "極限マクロ · 足首",
+    "displayedMode": "7"
+  },
+  "footControls": {
+    "bare": true,
+    "label": "かかと",
+    "disabled": true
+  },
+  "pageErrors": [],
+  "runtime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "yarnDiameterMicrometers": 59.54528205231674,
+  "samples": {
+    "thigh": {
+      "position": [
+        0.020544376224279404,
+        0.6039110422134399,
+        0.06053430214524269
+      ],
+      "normal": [
+        0.2622072862318941,
+        -0.0723405306119532,
+        0.9622963091884362
+      ],
+      "gapMm": 0.4199999966658652,
+      "stretchHoop": 2.930142402648926,
+      "stretchAxial": 1.089863657951355,
+      "tensionHoopNpm": 186.48289489746094,
+      "tensionAxialNpm": 4.804445743560791,
+      "pressurePa": 2666.295166015625,
+      "reinforcement": 1,
+      "restRadiusM": 0.024000000208616257,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.20606240778577134
+    },
+    "ankle": {
+      "position": [
+        0.01090142410248518,
+        0.18638408184051514,
+        0.024769093841314316
+      ],
+      "normal": [
+        0.2827508778396151,
+        -0.16713382658536505,
+        0.9445201030639104
+      ],
+      "gapMm": 0.4199999966658652,
+      "stretchHoop": 1.5427064895629883,
+      "stretchAxial": 1.0300297737121582,
+      "tensionHoopNpm": 15.193560600280762,
+      "tensionAxialNpm": 1.2891144752502441,
+      "pressurePa": 414.9869079589844,
+      "reinforcement": 1,
+      "restRadiusM": 0.024000000208616257,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.23999620837191782
+    },
+    "cuff": {
+      "position": [
+        0.02427670545876026,
+        0.677110493183136,
+        0.06517893075942993
+      ],
+      "normal": [
+        0.1778813525371021,
+        -0.06472783439266058,
+        0.9819208378858285
+      ],
+      "gapMm": 0.4199999966658652,
+      "stretchHoop": 3.4480481147766113,
+      "stretchAxial": 1.0913554430007935,
+      "tensionHoopNpm": 537.75634765625,
+      "tensionAxialNpm": 9.121292114257812,
+      "pressurePa": 6528.6474609375,
+      "reinforcement": 2.1500000953674316,
+      "restRadiusM": 0.024000000208616257,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.3715511555873112
+    },
+    "toe": {
+      "position": [
+        -0.008599301800131798,
+        0.028634244576096535,
+        0.15575449168682098
+      ],
+      "normal": [
+        0.15060231589581785,
+        0.9839035232282783,
+        0.09619147272912
+      ],
+      "gapMm": 0.4199999966658652,
+      "stretchHoop": 0.7502813935279846,
+      "stretchAxial": 1.2562623023986816,
+      "tensionHoopNpm": 0,
+      "tensionAxialNpm": 5.952011585235596,
+      "pressurePa": 0,
+      "reinforcement": 1.9500000476837158,
+      "restRadiusM": 0.018400000408291817,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.5309543650790829
+    },
+    "kneeFront": {
+      "position": [
+        0.0005727743846364319,
+        0.44030827283859253,
+        0.05840433016419411
+      ],
+      "normal": [
+        -0.014441316087287008,
+        -0.26048740603607423,
+        0.9653692348973343
+      ],
+      "gapMm": 0.4199999966658652,
+      "stretchHoop": 2.254491090774536,
+      "stretchAxial": 1.2093753814697266,
+      "tensionHoopNpm": 68.52088165283203,
+      "tensionAxialNpm": 6.719872951507568,
+      "pressurePa": 1278.3665771484375,
+      "reinforcement": 1,
+      "restRadiusM": 0.024000000208616257,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.20064758030437047
+    },
+    "kneeBack": {
+      "position": [
+        0.0005853258189745247,
+        0.4542638063430786,
+        -0.036483436822891235
+      ],
+      "normal": [
+        0.015442987991031032,
+        0.2187135472800915,
+        -0.9756668992838018
+      ],
+      "gapMm": 0.4199999966658652,
+      "stretchHoop": 2.1132218837738037,
+      "stretchAxial": 1.0554102659225464,
+      "tensionHoopNpm": 52.20494079589844,
+      "tensionAxialNpm": 2.6208317279815674,
+      "pressurePa": 1037.176025390625,
+      "reinforcement": 1,
+      "restRadiusM": 0.024000000208616257,
+      "selfContactCorrectionMm": 0,
+      "foldAmount": 0,
+      "normalOpacity": 0.22132134423567806
+    }
+  },
+  "relaxedSize": {
+    "tubeDiameterMm": 48,
+    "toeDiameterMm": 36.8,
+    "axialLengthMm": 797.2692251205444
+  },
+  "gaps": {
+    "ankleFront": {
+      "minMm": 0.4199999966658652,
+      "maxMm": 0.4199999966658652,
+      "samples": 18
+    },
+    "kneeRear": {
+      "minMm": 0.4199999966658652,
+      "maxMm": 0.7666620658710599,
+      "samples": 17
+    }
+  },
+  "selfContact": {
+    "contactPoints": 0,
+    "maxCorrectionMm": 0,
+    "reversedPoints": 0
+  },
+  "footContact": {
+    "footPoints": 8000,
+    "footInsideSkin": 0,
+    "minFootFieldMm": 0.15178157025000485,
+    "closestFootPointM": [
+      0.03701064735651016,
+      0.0066924262791872025,
+      0.11832531541585922
+    ]
+  },
+  "footFit": {
+    "clothWidthMm": 97.22954034805298,
+    "skinWidthMm": 93.67912262678146,
+    "tipOverhangMm": 1.6519874334335327,
+    "triangleCenters": {
+      "samples": 16320,
+      "insideSkin": 0,
+      "minFieldMm": 0.13634364317375203,
+      "closestPointM": [
+        0.03514239316185316,
+        0.006766058504581451,
+        0.11754219233989716
+      ]
+    }
+  },
+  "tensionOpacity": {
+    "samples": 15808,
+    "pearson": -0.31504788295704184
+  },
+  "initial": {
+    "points": 22945,
+    "triangles": 45120,
+    "prepareMs": 115.20000000111759,
+    "medianMs": 7.099999999627471,
+    "p95Ms": 9.5,
+    "samples": 7
+  },
+  "front": {
+    "fps": 7.013223823142079,
+    "durationMs": 12832.900000000001,
+    "medianMs": 100.10000000000582,
+    "p95Ms": 283.40000000000146,
+    "samples": 90,
+    "width": 1440,
+    "height": 1080
+  },
+  "macro": {
+    "fps": 3.3375856646987265,
+    "durationMs": 26965.600000000006,
+    "medianMs": 283.29999999999563,
+    "p95Ms": 416.6000000000058,
+    "samples": 90,
+    "width": 1440,
+    "height": 1080
+  },
+  "meshes": [
+    {
+      "id": "low",
+      "points": 9061,
+      "renderPoints": 9062,
+      "triangles": 17640,
+      "prepareMs": 49.79999999888241,
+      "medianMs": 3.599999999627471,
+      "p95Ms": 5,
+      "samples": 15,
+      "footFit": {
+        "clothWidthMm": 97.16423973441124,
+        "skinWidthMm": 93.67912262678146,
+        "tipOverhangMm": 1.6513913869857788,
+        "triangleCenters": {
+          "samples": 6400,
+          "insideSkin": 0,
+          "minFieldMm": -0.049279065375648405,
+          "closestPointM": [
+            0.04461048419276873,
+            0.011246046361823877,
+            0.14494445423285165
+          ]
+        }
+      }
+    },
+    {
+      "id": "standard",
+      "points": 22945,
+      "renderPoints": 22946,
+      "triangles": 45120,
+      "prepareMs": 82.40000000037253,
+      "medianMs": 7.100000001490116,
+      "p95Ms": 15.5,
+      "samples": 15,
+      "footFit": {
+        "clothWidthMm": 97.22954034805298,
+        "skinWidthMm": 93.67912262678146,
+        "tipOverhangMm": 1.6519874334335327,
+        "triangleCenters": {
+          "samples": 16320,
+          "insideSkin": 0,
+          "minFieldMm": 0.13634364317375203,
+          "closestPointM": [
+            0.03514239316185316,
+            0.006766058504581451,
+            0.11754219233989716
+          ]
+        }
+      }
+    },
+    {
+      "id": "high",
+      "points": 43165,
+      "renderPoints": 43166,
+      "triangles": 85272,
+      "prepareMs": 165.2999999988824,
+      "medianMs": 14.099999999627471,
+      "p95Ms": 17.40000000037253,
+      "samples": 15,
+      "footFit": {
+        "clothWidthMm": 97.22089022397995,
+        "skinWidthMm": 93.67912262678146,
+        "tipOverhangMm": 1.652047038078308,
+        "triangleCenters": {
+          "samples": 30888,
+          "insideSkin": 0,
+          "minFieldMm": 0.10093404950303721,
+          "closestPointM": [
+            0.03621787950396538,
+            0.007155845562616984,
+            0.11738957713047664
+          ]
+        }
+      }
+    }
+  ]
+}

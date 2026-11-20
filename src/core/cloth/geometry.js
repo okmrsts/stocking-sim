@@ -25,7 +25,6 @@ export function createClothGeometry(frame) {
     }
     indices.push(points, column + 1, column);
   }
-  positions[points * 3 + 2] += 0.0011;
   coordinates[points * 2] = coordinates[columns * 2] * 0.5;
   fields.set(fields.subarray(0, 4), points * 4);
   details.set(details.subarray(0, 4), points * 4);

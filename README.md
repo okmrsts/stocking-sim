@@ -6,7 +6,7 @@ WebGPU 専用の布シミュレーターを段階ごとに作ります。段階1
 
 リポジトリのルートで `python3 -m http.server 8765` を実行し、WebGPU に対応したブラウザーで [localhost](http://localhost:8765/) を開きます。ビルドやパッケージのインストールは不要です。CDN に接続できる必要があります。
 
-[GitHub Pages のシミュレーター](https://okmrsts.github.io/stocking-sim/) を開けます。配信元は `main` の `/(root)` です。[段階0の診断](checks/0/probe.html) · [段階1aのサイズ調整前後と検証](checks/1a-snug-fit/README.md)
+[GitHub Pages のシミュレーター](https://okmrsts.github.io/stocking-sim/) を開けます。配信元は `main` の `/(root)` です。[段階0の診断](checks/0/probe.html) · [段階1aの足部とサイズの調整前後](checks/1a-close-fit/README.md)
 
 ## ファイル
 

@@ -11,6 +11,7 @@ import { createKneeHighInput } from './stocking/rest-shape.js';
 import { createStudio } from './stocking/scene.js';
 import { createStageCamera } from './stocking/stage-camera.js';
 import { collectFitMetrics } from './stocking/stage1a-metrics.js';
+import { measureFootFit } from './stocking/foot-fit-metrics.js';
 
 const query = new URLSearchParams(location.search);
 const format = new Intl.NumberFormat('ja-JP');
@@ -79,7 +80,8 @@ export async function start() {
   };
   const cloth = createTextileMaterial(optics, diagnostics);
   const geometry = createClothGeometry(frame);
-  const { scene, textile } = createStudio(renderConfig, surface.skinParts(), geometry, cloth.material);
+  const bodyParts = surface.skinParts();
+  const { scene, textile } = createStudio(renderConfig, bodyParts, geometry, cloth.material);
   const { camera, setView: positionCamera, rotate, zoom } = createStageCamera(views, anchor => {
     const sample = sampleCloth(frame, surface, anchor.arcM, anchor.angleRad);
     return {
@@ -189,7 +191,7 @@ export async function start() {
     });
   }
 
-  async function meshBenchmarks(repeats, includeRendering = false) {
+  async function meshBenchmarks(repeats, includeRendering = false, includeFootFit = false) {
     const results = [];
     for (const level of meshLevels) {
       const { fitted, prepareMs } = await measureSolve(level, repeats);
@@ -197,11 +199,16 @@ export async function start() {
         id: level.id, points: fitted.points, renderPoints: fitted.points + 1,
         triangles: fitted.triangles, prepareMs, ...summarize(fitted.elapsedMs)
       };
-      if (includeRendering) {
+      if (includeRendering || includeFootFit) {
         const measuredGeometry = createClothGeometry(fitted);
-        textile.geometry = measuredGeometry;
         try {
-          measured.fullView = await profileView('front', 45);
+          if (includeFootFit) {
+            measured.footFit = measureFootFit(measuredGeometry, bodyParts[1], surface.footDistance, surface.footLimitM);
+          }
+          if (includeRendering) {
+            textile.geometry = measuredGeometry;
+            measured.fullView = await profileView('front', 45);
+          }
         } finally {
           textile.geometry = geometry;
           measuredGeometry.dispose();
@@ -295,6 +302,7 @@ export async function start() {
     window.stockingStage1a = {
       result, setView, setDisplay, setBarefoot, profileView, meshBenchmarks,
       ...collectFitMetrics(frame, surface, optics, cloth.radiusM),
+      footFit: measureFootFit(geometry, bodyParts[1], surface.footDistance, surface.footLimitM),
       initial: { points: frame.points, triangles: frame.triangles, prepareMs: initial.prepareMs, ...summarize(frame.elapsedMs) }
     };
   }

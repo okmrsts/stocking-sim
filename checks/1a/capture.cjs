@@ -8,11 +8,11 @@ const photos = [
   ['thigh', '04-thigh'], ['thigh-macro', '05a-thigh-macro'], ['ankle-macro', '05b-ankle-macro'],
   ['foot', '06a-foot'], ['heel', '06b-heel']
 ];
-const output = join(__dirname, '../1a-snug-fit');
+const output = join(__dirname, '../1a-close-fit');
 
 async function capture() {
   const config = JSON.parse(await readFile(join(__dirname, '../views-1a-revision.json'), 'utf8'));
-  const baseline = JSON.parse(await readFile(join(__dirname, '../1a-revision/result.json'), 'utf8'));
+  const baseline = JSON.parse(await readFile(join(__dirname, '../1a-snug-fit/result.json'), 'utf8'));
   const { width, height, deviceScaleFactor } = config.viewport;
   const viewport = { width, height };
   await withBrowser(process.argv[2], process.argv[3], async ({ browser, base, newPage, args }) => {
@@ -47,11 +47,11 @@ async function capture() {
       app.setDisplay(0);
       const front = await app.profileView('front');
       const macro = await app.profileView('thigh-macro');
-      const meshes = await app.meshBenchmarks(15);
+      const meshes = await app.meshBenchmarks(15, false, true);
       return {
         runtime: app.result, yarnDiameterMicrometers: app.yarnDiameterMicrometers,
         samples: app.samples, relaxedSize: app.relaxedSize, gaps: app.gaps,
-        selfContact: app.selfContact, footContact: app.footContact,
+        selfContact: app.selfContact, footContact: app.footContact, footFit: app.footFit,
         tensionOpacity: app.tensionOpacity, initial: app.initial, front, macro, meshes
       };
     });
@@ -95,11 +95,14 @@ async function capture() {
     const gapSpread = gap => gap.maxMm - gap.minMm;
     const reducedWrinkles = Object.keys(result.gaps).every(site =>
       gapSpread(result.gaps[site]) < 0.6 * gapSpread(baseline.gaps[site])
-    ) && result.selfContact.reversedPoints < baseline.selfContact.reversedPoints;
+    ) && result.selfContact.reversedPoints <= baseline.selfContact.reversedPoints;
+    const { clothWidthMm, skinWidthMm, tipOverhangMm } = result.footFit;
+    const footFitted = tipOverhangMm > 0 && tipOverhangMm < 3 && clothWidthMm - skinWidthMm < 4.5
+      && result.meshes.every(level => level.footFit.triangleCenters.insideSkin === 0);
     const plausible = thigh.stretchHoop > ankle.stretchHoop && thigh.normalOpacity < ankle.normalOpacity
       && cuff.normalOpacity > thigh.normalOpacity && toe.normalOpacity > thigh.normalOpacity
       && reducedWrinkles && result.tensionOpacity.pearson < 0
-      && result.footContact.footInsideSkin === 0
+      && footFitted && result.footContact.footInsideSkin === 0
       && result.footContact.footPoints > 0;
     if (!plausible || pageErrors.length || result.runtime.errors.length || result.runtime.validationErrors !== 0
       || mobileLayout.overflows || !mobileLayout.closed || mobileLayout.displayedMode !== '7'

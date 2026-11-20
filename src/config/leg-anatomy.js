@@ -64,18 +64,11 @@ export const footAnatomy = {
     [0.075,-0.002,-0.017,0.026,0.028],
     [0.092,-0.001,-0.015,0.029,0.031]
   ],
-  // Rounded contact sections bridge the interdigital gaps without tracing each toe.
-  toeEnvelope: [
-    [0.091,-0.003,0.042,0.0010,0.053],
-    [0.110,-0.001,0.047,0.0010,0.047],
-    [0.128,-0.001,0.050,0.0010,0.040],
-    [0.140,-0.002,0.052,0.0010,0.037],
-    [0.150,-0.005,0.048,0.0010,0.034],
-    [0.159,-0.010,0.041,0.0010,0.033],
-    [0.167,-0.019,0.033,0.0015,0.030],
-    [0.174,-0.025,0.023,0.0035,0.027],
-    [0.179,-0.031,0.014,0.0080,0.024],
-    [0.183,-0.034,0.003,0.0140,0.018]
-  ],
+  // Contact allowances are smaller than the tissue details between the toes.
+  contact: {
+    forefootStartZM: 0.095, forefootBlendM: 0.032,
+    toeTipExtraM: 0.0011, toeCapBlendM: 0.028, toeClearanceM: 0.00185, toeBridgeM: 0.0018,
+    footClearanceM: 0.00120, samplePitchM: 0.0009
+  },
   skinJoinM: 0.310, skinGridM: 0.0026
 };

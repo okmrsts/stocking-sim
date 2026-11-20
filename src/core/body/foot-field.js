@@ -39,7 +39,7 @@ export function createFootField(anatomy, leg) {
     return [s.x, s.z, s.width, s.depth].map((value, axis) => lower[axis] + (value - lower[axis]) * weight);
   });
 
-  function footDistance(x, y, z, envelope = false) {
+  function footDistance(x, y, z) {
     const station = Math.max(0, Math.min(foot.length - 1.001, (z - sections[0][0]) / interval));
     const segment = Math.floor(station);
     const fraction = station - segment;
@@ -62,7 +62,7 @@ export function createFootField(anatomy, leg) {
       for (const [cx, cy, cz, rx, ry, rz, splay] of toes) {
         const dz = z - cz;
         const d = ellipsoid(x - cx - splay * dz, y - cy, dz, rx, ry, rz);
-        distance = smoothUnion(distance, d, envelope ? 0.009 : 0.004 * (1 - blend(z, cz - rz * 0.3, cz + rz * 0.60)));
+        distance = smoothUnion(distance, d, 0.004 * (1 - blend(z, cz - rz * 0.3, cz + rz * 0.60)));
       }
     }
     if (y > 0.012) {
