@@ -6,12 +6,13 @@ const photos = [
   ['front', '01-front'], ['oblique', '02-oblique'],
   ['ankle-wrinkles', '03a-ankle'], ['knee-wrinkles', '03b-knee'],
   ['thigh', '04-thigh'], ['thigh-macro', '05a-thigh-macro'], ['ankle-macro', '05b-ankle-macro'],
-  ['foot', '06a-foot'], ['heel', '06b-heel'], ['foot', '07a-bare-foot', true], ['heel', '07b-bare-heel', true]
+  ['foot', '06a-foot'], ['heel', '06b-heel']
 ];
-const output = join(__dirname, '../1a-revision');
+const output = join(__dirname, '../1a-snug-fit');
 
 async function capture() {
   const config = JSON.parse(await readFile(join(__dirname, '../views-1a-revision.json'), 'utf8'));
+  const baseline = JSON.parse(await readFile(join(__dirname, '../1a-revision/result.json'), 'utf8'));
   const { width, height, deviceScaleFactor } = config.viewport;
   const viewport = { width, height };
   await withBrowser(process.argv[2], process.argv[3], async ({ browser, base, newPage, args }) => {
@@ -28,24 +29,17 @@ async function capture() {
       throw new Error(await page.locator('#details').textContent());
     }
 
-    for (const [viewId, filename, barefoot = false] of photos) {
-      await page.evaluate(async ({ viewId, barefoot }) => {
-        window.stockingStage1a.setBarefoot(barefoot);
-        await window.stockingStage1a.profileView(viewId, 2);
-      }, { viewId, barefoot });
+    for (const [viewId, filename] of photos) {
+      await page.evaluate(view => window.stockingStage1a.profileView(view, 2), viewId);
       await page.screenshot({ path: join(output, filename + '.png') });
     }
 
-    const diagnosticPhotos = [
-      [1, 'front', 'diagnostic-tension'], [4, 'front', 'diagnostic-opacity'],
-      [7, 'ankle-wrinkles', 'diagnostic-contact-ankle'], [7, 'knee-wrinkles', 'diagnostic-contact-knee']
-    ];
-    for (const [mode, view, file] of diagnosticPhotos) {
-      await page.evaluate(async ({ display, view }) => {
-        window.stockingStage1a.setBarefoot(false);
+    const diagnosticPhotos = [[1, 'diagnostic-tension'], [4, 'diagnostic-opacity']];
+    for (const [mode, file] of diagnosticPhotos) {
+      await page.evaluate(async display => {
         window.stockingStage1a.setDisplay(display);
-        await window.stockingStage1a.profileView(view, 2);
-      }, { display: mode, view });
+        await window.stockingStage1a.profileView('front', 2);
+      }, mode);
       await page.screenshot({ path: join(output, file + '.png') });
     }
     const measurements = await page.evaluate(async () => {
@@ -56,7 +50,8 @@ async function capture() {
       const meshes = await app.meshBenchmarks(15);
       return {
         runtime: app.result, yarnDiameterMicrometers: app.yarnDiameterMicrometers,
-        samples: app.samples, gaps: app.gaps, selfContact: app.selfContact, footContact: app.footContact,
+        samples: app.samples, relaxedSize: app.relaxedSize, gaps: app.gaps,
+        selfContact: app.selfContact, footContact: app.footContact,
         tensionOpacity: app.tensionOpacity, initial: app.initial, front, macro, meshes
       };
     });
@@ -97,11 +92,14 @@ async function capture() {
     };
     console.log(JSON.stringify(result, null, 2));
     const { thigh, ankle, cuff, toe } = result.samples;
+    const gapSpread = gap => gap.maxMm - gap.minMm;
+    const reducedWrinkles = Object.keys(result.gaps).every(site =>
+      gapSpread(result.gaps[site]) < 0.6 * gapSpread(baseline.gaps[site])
+    ) && result.selfContact.reversedPoints < baseline.selfContact.reversedPoints;
     const plausible = thigh.stretchHoop > ankle.stretchHoop && thigh.normalOpacity < ankle.normalOpacity
       && cuff.normalOpacity > thigh.normalOpacity && toe.normalOpacity > thigh.normalOpacity
-      && Object.values(result.gaps).every(gap => gap.maxMm - gap.minMm > 0.5)
-      && result.tensionOpacity.pearson < 0 && result.selfContact.contactPoints > 0
-      && result.selfContact.reversedPoints > 0 && result.footContact.footInsideSkin === 0
+      && reducedWrinkles && result.tensionOpacity.pearson < 0
+      && result.footContact.footInsideSkin === 0
       && result.footContact.footPoints > 0;
     if (!plausible || pageErrors.length || result.runtime.errors.length || result.runtime.validationErrors !== 0
       || mobileLayout.overflows || !mobileLayout.closed || mobileLayout.displayedMode !== '7'

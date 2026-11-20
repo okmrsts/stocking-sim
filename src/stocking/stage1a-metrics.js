@@ -57,6 +57,11 @@ export function collectFitMetrics(frame, surface, optics, radiusM) {
   }
   const tensionOpacity = { samples: relation.length, pearson: xy / Math.sqrt(xx * yy) };
   return {
+    relaxedSize: {
+      tubeDiameterMm: optics.relaxedRadiusM * 2000,
+      toeDiameterMm: optics.relaxedToeRadiusM * 2000,
+      axialLengthMm: frame.relaxedArc.at(-1) * 1000
+    },
     samples, tensionOpacity, selfContact: { contactPoints, maxCorrectionMm, reversedPoints },
     footContact: { footPoints, footInsideSkin, minFootFieldMm, closestFootPointM }, yarnDiameterMicrometers: radiusM * 2e6,
     gaps: { ankleFront: gapRange(0.324, 0.022, 0.31), kneeRear: gapRange(0.622, 0.021, Math.PI) }

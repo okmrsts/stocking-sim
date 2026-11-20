@@ -10,7 +10,7 @@ from PIL import Image
 from scipy import ndimage
 
 baseline = Path(__file__).resolve().parent
-folder = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else baseline.parent / "1a-revision"
+folder = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else baseline.parent / "1a-snug-fit"
 views_file = "views-1a.json" if folder == baseline else "views-1a-revision.json"
 views = json.loads((baseline.parent / views_file).read_text())
 height = views["viewport"]["height"]

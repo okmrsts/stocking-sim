@@ -3,7 +3,11 @@ export { bodyProfile, footAnatomy } from './leg-anatomy.js';
 export const preset = Object.freeze({
   label: '20D 平編みニーハイ', denier: 20, fiberDensityKgM3: 1140, packingFraction: 0.70,
   topM: 0.849, toeEndM: 0.061, cuffWidthM: 0.029,
-  relaxedRadiusM: 0.0268, relaxedToeRadiusM: 0.021, axialEase: 1.014,
+  relaxedRadiusM: 0.0255, relaxedToeRadiusM: 0.0199, axialEase: 0.974,
+  axialEaseZones: [
+    { arcM: 0.320, widthM: 0.035, lengthRatioDelta: 0.080 },
+    { arcM: 0.621, widthM: 0.035, lengthRatioDelta: -0.025 }
+  ],
   cuffStiffness: 1.55, cuffYarnCount: 2.15, toeYarnCount: 1.95,
   cellPitchM: [0.00047, 0.00045], dyeLinear: [0.026, 0.025, 0.036]
 });
