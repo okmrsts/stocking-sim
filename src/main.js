@@ -1,7 +1,4 @@
 import { NeutralToneMapping, SRGBColorSpace } from 'three/webgpu';
-import { createLeg } from './core/body/leg-model.js';
-import { createLowerBodyGeometry } from './core/body/lower-body.js';
-import { updateTissueField, wrapCompliantSurface } from './core/body/soft-tissue.js';
 import { createClothGeometry, sampleCloth } from './core/cloth/geometry.js';
 import { createStaticShellSolver } from './core/cloth/solver.js';
 import { createGpuContext, withGpuValidation } from './core/gpu/context.js';
@@ -9,9 +6,10 @@ import { createTextileMaterial } from './core/textile/material.js';
 import { measureFrames, summarize } from './core/ui/metrics.js';
 import { connectOrbit } from './core/ui/pointer-router.js';
 import {
-  bodyProfile, comparisonConfig, footAnatomy, diagnostics, lowerBodyConfig, material, meshLevels, preset, renderConfig, tissue
+  comparisonConfig, diagnostics, meshLevels, preset, renderConfig, tissueDisplay
 } from './config/stage1a.js';
-import { createKneeHighInput } from './stocking/rest-shape.js';
+import { buildFitting, disposeFitting } from './stocking/build-fitting.js';
+import { connectBodyControls } from './stocking/body-controls.js';
 import { createUnloadedGeometry } from './stocking/unloaded-preview.js';
 import { createStudio } from './stocking/scene.js';
 import { createStageCamera } from './stocking/stage-camera.js';
@@ -66,24 +64,9 @@ export async function start() {
   const response = await fetch(new URL('../checks/views-1a-anatomy.json', import.meta.url));
   if (!response.ok) throw new Error('視点の設定を読み込めません。');
   const { views, defaultView } = await response.json();
-  const bareLeg = createLeg(bodyProfile, footAnatomy);
-  let surface = bareLeg, tissueField;
-  const solve = await withGpuValidation(device, reportError, () => createStaticShellSolver(device));
-  const standard = meshLevels.find(level => level.id === 'standard');
-  const measureSolve = async (level, repeats) => {
-    const start = performance.now();
-    const input = createKneeHighInput(surface, preset, level);
-    const prepareMs = performance.now() - start;
-    const fitted = await withGpuValidation(device, reportError, () => solve(input, material, repeats));
-    return { fitted, prepareMs };
-  };
-  for (let pass = 0; pass < tissue.passes; pass++) {
-    const { fitted } = await measureSolve(standard, 0);
-    tissueField = updateTissueField(fitted, tissue, tissueField);
-    surface = wrapCompliantSurface(bareLeg, tissueField);
-  }
-  const initial = await measureSolve(standard, 7);
-  const frame = initial.fitted;
+  const solver = await withGpuValidation(device, reportError, () => createStaticShellSolver(device));
+  const solve = (...args) => withGpuValidation(device, reportError, () => solver(...args));
+  let fitting = await buildFitting({}, solve, 7);
   const optics = {
     ...preset,
     cellPitchM: [
@@ -92,19 +75,12 @@ export async function start() {
     ]
   };
   const cloth = createTextileMaterial(optics, diagnostics);
-  const geometry = createClothGeometry(frame);
-  const unloadedGeometry = createUnloadedGeometry(frame);
-  const foot = bareLeg.createFootGeometry();
-  const skinStart = footAnatomy.skinJoinM;
-  const body = {
-    foot, halfStanceM: lowerBodyConfig.halfStanceM,
-    bare: createLowerBodyGeometry(bareLeg.skinSurface, foot, skinStart, lowerBodyConfig),
-    loaded: createLowerBodyGeometry(wrapCompliantSurface(bareLeg.skinSurface, tissueField), foot, skinStart, lowerBodyConfig)
-  };
-  const { scene, textile, unloaded, setSkinLoaded, setClothGeometry } = createStudio(
-    renderConfig, body, geometry, unloadedGeometry, cloth.material
+  const unloadedGeometry = createUnloadedGeometry(fitting.frame);
+  const { scene, textile, unloaded, setSkinLoaded, setBody, setTissueMap, setClothGeometry } = createStudio(
+    renderConfig, fitting.body, fitting.geometry, unloadedGeometry, cloth.material, tissueDisplay
   );
   const { camera, target, setView: positionCamera, setAspect, rotate, zoom, zoomRatio } = createStageCamera(views, anchor => {
+    const { frame, surface, body } = fitting;
     const sample = sampleCloth(frame, surface, anchor.arcM, anchor.angleRad);
     return {
       positionM: sample.position.map((coordinate, axis) =>
@@ -119,6 +95,8 @@ export async function start() {
   let drawQueued = false;
   let measuring = false;
   let userMovedCamera = false;
+  let tissueVisible = false;
+  let bareBeforeMap = false;
 
   function requestDraw() {
     if (drawQueued || measuring) return;
@@ -148,6 +126,7 @@ export async function start() {
     userMovedCamera = false;
     positionCamera(viewId);
     const comparing = viewId === 'comparison';
+    if (comparing && tissueVisible) setTissueVisible(false);
     unloaded.visible = comparing;
     comparisonLabels.hidden = !comparing;
     viewLabel.hidden = comparing;
@@ -179,12 +158,20 @@ export async function start() {
     return true;
   }
 
+  const legend = document.getElementById('legend');
+  const legendText = document.getElementById('legend-text');
+
+  function updateLegend() {
+    legend.hidden = !tissueVisible && (cloth.mode.value === 0 || !textile.visible);
+    legendText.textContent = tissueVisible
+      ? '変形しやすさ 0 — ' + tissueDisplay.maxMmPerKpa + ' mm/kPa（青ほど硬い）'
+      : modeLabels[cloth.mode.value] + '  ' + legends[cloth.mode.value];
+  }
+
   function setDisplay(mode) {
     cloth.mode.value = mode;
     viewMode.value = String(mode);
-    const legend = document.getElementById('legend');
-    legend.hidden = mode === 0 || !textile.visible;
-    document.getElementById('legend-text').textContent = modeLabels[mode] + '  ' + legends[mode];
+    updateLegend();
     requestDraw();
   }
 
@@ -195,11 +182,29 @@ export async function start() {
     setSkinLoaded(!barefoot);
     barefootButton.setAttribute('aria-pressed', String(barefoot));
     viewMode.disabled = barefoot || measuring;
-    document.getElementById('legend').hidden = barefoot || cloth.mode.value === 0;
+    updateLegend();
     requestDraw();
   }
+
+  function setTissueVisible(enabled) {
+    if (enabled === tissueVisible) return true;
+    if (enabled) {
+      bareBeforeMap = !textile.visible;
+      setBarefoot(true);
+    }
+    tissueVisible = enabled;
+    setTissueMap(enabled);
+    updateMapButton(enabled);
+    if (!enabled) setBarefoot(bareBeforeMap);
+    updateLegend();
+    requestDraw();
+    return true;
+  }
+
   barefootButton.addEventListener('click', () => {
-    if (!measuring) setBarefoot(textile.visible);
+    if (measuring) return;
+    if (tissueVisible) setTissueVisible(false);
+    else setBarefoot(textile.visible);
   });
 
   function resize() {
@@ -222,6 +227,7 @@ export async function start() {
   }
 
   async function meshBenchmarks(repeats, includeRendering = false, includeFootFit = false) {
+    const { measureSolve, surface, geometry, body: { foot } } = fitting;
     const results = [];
     for (const level of meshLevels) {
       const { fitted, prepareMs } = await measureSolve(level, repeats);
@@ -249,10 +255,48 @@ export async function start() {
     return results;
   }
 
-  document.getElementById('mesh-stats').textContent =
-    format.format(frame.points) + ' 計算点 · ' + format.format(frame.triangles) + ' 三角形';
-  document.getElementById('solve-stats').textContent =
-    '布計算 ' + summarize(frame.elapsedMs).medianMs.toFixed(2) + ' ms';
+  function updateFitStats() {
+    const { frame } = fitting;
+    document.getElementById('mesh-stats').textContent =
+      format.format(frame.points) + ' 計算点 · ' + format.format(frame.triangles) + ' 三角形';
+    document.getElementById('solve-stats').textContent =
+      '布計算 ' + summarize(frame.elapsedMs).medianMs.toFixed(2) + ' ms';
+  }
+
+  async function applyBody(values) {
+    if (measuring) return false;
+    if (Object.entries(fitting.dimensions).every(([id, value]) => values[id] === value)) return true;
+    measuring = true;
+    try {
+      const next = await buildFitting(values, solve, 5);
+      const previous = fitting;
+      fitting = next;
+      setBody(next.body);
+      setClothGeometry(next.geometry);
+      setSkinLoaded(textile.visible);
+      setTissueMap(tissueVisible);
+      setView(currentView);
+      updateFitStats();
+      frameStats.textContent = '';
+      exposeCapture();
+      disposeFitting(previous);
+      return true;
+    } catch (error) {
+      reportError('体型の更新', error);
+      throw error;
+    } finally {
+      measuring = false;
+      viewMode.disabled = !textile.visible;
+      requestDraw();
+    }
+  }
+
+  const updateMapButton = connectBodyControls({
+    initial: fitting.dimensions,
+    onApply: applyBody,
+    onMap: enabled => !measuring && setTissueVisible(enabled)
+  });
+  updateFitStats();
   for (const button of controls) button.addEventListener('click', () => {
     if (!measuring) setView(button.dataset.view);
   });
@@ -280,6 +324,8 @@ export async function start() {
     output.textContent = '計測中…';
     const restoreView = currentView;
     const restoreDisplay = cloth.mode.value;
+    const restoreMap = tissueVisible;
+    if (restoreMap) setTissueVisible(false);
     const restoreBarefoot = !textile.visible;
     try {
       setBarefoot(false);
@@ -304,6 +350,7 @@ export async function start() {
       setView(restoreView);
       setDisplay(restoreDisplay);
       setBarefoot(restoreBarefoot);
+      if (restoreMap) setTissueVisible(true);
     }
   });
 
@@ -328,13 +375,17 @@ export async function start() {
     status.textContent = 'WebGPU · 検証エラー 0件';
   }
 
-  if (query.has('capture')) {
+  function exposeCapture() {
+    if (!query.has('capture')) return;
+    const { frame, surface, body, geometry, tissueField, initial, dimensions } = fitting;
     window.stockingStage1a = {
-      result, setView, setDisplay, setBarefoot, profileView, meshBenchmarks, unloadedGeometry,
+      result, setView, setDisplay, setBarefoot, setTissueVisible, profileView, meshBenchmarks, unloadedGeometry,
+      applyBody, dimensions,
       ...collectFitMetrics(frame, surface, optics, cloth.radiusM),
-      footFit: measureFootFit(geometry, foot, surface.footDistance, surface.footLimitM),
+      footFit: measureFootFit(geometry, body.foot, surface.footDistance, surface.footLimitM),
       lowerBody: { ...body, textile, tissueField },
       initial: { points: frame.points, triangles: frame.triangles, prepareMs: initial.prepareMs, ...summarize(frame.elapsedMs) }
     };
   }
+  exposeCapture();
 }

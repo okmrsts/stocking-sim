@@ -48,14 +48,22 @@ button, select {
 }
 button { cursor: pointer; }
 button[aria-pressed="true"] { color: #fffdf8; background: var(--ink); border-color: var(--ink); }
-button:focus-visible, a:focus-visible, select:focus-visible { outline: 2px solid #355e68; outline-offset: 2px; }
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #355e68; outline-offset: 2px; }
 #settings-open { margin-inline-start: auto; }
 .footer { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0; color: #5f5650; font-size: .75rem; }
-dialog { max-width: min(90vw, 440px); width: 100%; padding: 20px; border: 1px solid var(--line); border-radius: 13px; background: #fbf8f3; color: var(--ink); }
+dialog { max-width: min(90vw, 440px); max-height: 90svh; width: 100%; padding: 20px; border: 1px solid var(--line); border-radius: 13px; background: #fbf8f3; color: var(--ink); }
 dialog::backdrop { background: #29252172; }
 .sheet-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
 h2 { font-size: 1.03rem; margin: 0; }
 dialog select { display: block; width: 100%; margin: 5px 0 12px; }
+#body-ranges { display: grid; gap: 9px; border: 0; padding: 0; margin: 0 0 14px; }
+#body-ranges label { display: grid; grid-template-columns: 1fr auto; gap: 1px 12px; font-size: .84rem; }
+#body-ranges output { font-variant-numeric: tabular-nums; }
+#body-ranges input { grid-column: 1 / -1; width: 100%; min-height: 24px; accent-color: #355e68; }
+.body-actions { display: flex; justify-content: space-between; gap: 8px; }
+#body-apply { color: #fffdf8; background: var(--ink); border-color: var(--ink); }
+#body-apply:disabled { opacity: .6; }
+#body-map { margin-top: 10px; }
 #legend { position: absolute; top: 14px; right: 14px; max-width: min(74%, 220px); padding: 8px 10px; border: 1px solid #c2b8aa; border-radius: 6px; background: #f9f5eeef; font-size: .72rem; pointer-events: none; }
 .legend-fill { height: 8px; margin-bottom: 4px; border-radius: 4px; background: linear-gradient(90deg,#355ab4,#36ba99,#ed7139); }
 .measurement { white-space: pre-line; font-size: .82rem; margin-bottom: 0; }

@@ -1,4 +1,4 @@
-import { cross, difference, interpolate, normalize } from './swept-surface.js';
+import { cross, difference, normalize } from './swept-surface.js';
 
 const tau = 2 * Math.PI;
 const mix = (a, b, t) => a + (b - a) * t;
@@ -23,27 +23,26 @@ export function wrapCompliantSurface(surface, field) {
   return { ...surface, point, normal };
 }
 
-export function updateTissueField(frame, config, previous) {
+export function updateTissueField(frame, config, sampleTissue, previous, elapsedS) {
   const { columns, rows, arcs, state } = frame;
-  const { compliance, spreadM, angularSpreadRad, relaxation } = config;
+  const { startArcM, spreadM, angularSpreadRad, relaxation, timeConstantS } = config;
+  const blend = elapsedS === undefined ? relaxation : -Math.expm1(-Math.max(0, elapsedS) / timeConstantS);
   const step = arcs[1] - arcs[0];
   const extraRows = Math.ceil(3 * spreadM / step);
   const count = rows + extraRows + 1;
   const depths = new Float32Array(count * columns);
   const angular = kernel(angularSpreadRad / (tau / columns));
   const axial = kernel(spreadM / step);
-  const startArcM = compliance[0][0];
-
   for (let row = 0; row <= rows; row++) {
-    const [responseM, maxM] = interpolate(compliance, arcs[row]);
-    if (responseM <= 0) continue;
+    if (arcs[row] <= startArcM) continue;
     for (let col = 0; col < columns; col++) {
       let pressurePa = 0;
       for (const [offset, weight] of angular) {
         const index = row * (columns + 1) + (col + offset + columns) % columns;
         pressurePa += Math.max(0, state[index * 16 + 9]) * weight;
       }
-      depths[row * columns + col] = maxM * -Math.expm1(-(pressurePa / 1000) * responseM / maxM);
+      const [responseM, maxM] = sampleTissue(arcs[row], col * tau / columns);
+      depths[row * columns + col] = maxM > 0 ? maxM * -Math.expm1(-(pressurePa / 1000) * responseM / maxM) : 0;
     }
   }
 
@@ -61,7 +60,7 @@ export function updateTissueField(frame, config, previous) {
       // Spread the inward response across the edge of an applied load.
       const depth = along(row, col, axial);
       values[row * columns + col] = mix(previous?.sample(arc, angle) ?? 0,
-        gate * gate * (3 - 2 * gate) * depth, relaxation);
+        gate * gate * (3 - 2 * gate) * depth, blend);
     }
   }
 

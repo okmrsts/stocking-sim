@@ -1,5 +1,3 @@
-export { bodyProfile, footAnatomy, lowerBodyConfig } from './leg-anatomy.js';
-
 export const preset = Object.freeze({
   label: '20D 平編みニーハイ', denier: 20, fiberDensityKgM3: 1140, packingFraction: 0.70,
   topM: 0.849, toeEndM: 0.061, cuffWidthM: 0.029,
@@ -26,19 +24,13 @@ export const meshLevels = Object.freeze([
 ]);
 
 export const diagnostics = Object.freeze({ tensionNpmMax: 400, strainMax: 2.1, gapMmMax: 3.5, selfContactMmMax: 1.5 });
+export const tissueDisplay = Object.freeze({
+  maxMmPerKpa: 0.9, colorLow: 0x355ab4, colorMiddle: 0x36ba99, colorHigh: 0xed7139
+});
 
 export const tissue = Object.freeze({
-  // Material arc, inward displacement per kPa, saturation depth.
-  compliance: [
-    [0.310, 0,       0.0010],
-    [0.368, 0.00022, 0.0013],
-    [0.494, 0.00046, 0.0032],
-    [0.615, 0.00023, 0.0018],
-    [0.756, 0.00065, 0.0035],
-    [0.835, 0.00065, 0.0035]
-  ],
   passes: 3, spreadM: 0.010, angularSpreadRad: 0.17,
-  startFadeM: 0.038, relaxation: 0.68
+  startArcM: 0.310, startFadeM: 0.038, relaxation: 0.68, timeConstantS: 0.18
 });
 
 export const comparisonConfig = Object.freeze({ heightM: 1.24, minHeightM: 1.11, minWidthM: 0.86, cameraDistanceM: 2.4 });

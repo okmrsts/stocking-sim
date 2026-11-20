@@ -1,0 +1,203 @@
+{
+  "standard": {
+    "dimensions": {
+      "waist": 100,
+      "hips": 100,
+      "glutes": 100,
+      "thighs": 100,
+      "calves": 100,
+      "ankles": 100
+    },
+    "dimensionsMm": {
+      "navelHeightMm": 924.8827653151005,
+      "navelSectionDepthMm": 169.09136208082649,
+      "hipBreadthMm": 332.15554587295367,
+      "hipDepthMm": 206.36864354654273,
+      "crotchHeightMm": 711.3499735669538,
+      "thighBreadthMm": 163.47093105613737,
+      "thighDepthMm": 180.82512248001132,
+      "thighCircumferenceMm": 541.5864302392465,
+      "kneeDepthMm": 115.81387969438862,
+      "calfDepthMm": 105.44275971768336,
+      "calfCircumferenceMm": 351.1149531208992,
+      "footLengthMm": 233.80964249372482,
+      "footBreadthMm": 93.67912262678146,
+      "waistWidthMm": 247.9691505432129,
+      "buttBackMm": 131.65007531642914,
+      "ankleWidthMm": 66.85251370072365
+    },
+    "cuff": {
+      "samples": 7232,
+      "throughSkin": 0,
+      "minimumMm": 0.31393858073663905,
+      "maximumMm": 0.478778397409535
+    },
+    "topology": {
+      "components": 1,
+      "openEdges": 0,
+      "nonManifoldEdges": 0,
+      "inconsistentEdges": 0
+    },
+    "foot": {
+      "samples": 16320,
+      "insideSkin": 0,
+      "minFieldMm": 0.13634364317375203,
+      "closestPointM": [
+        0.03514239316185316,
+        0.006766058504581451,
+        0.11754219233989716
+      ]
+    }
+  },
+  "large": {
+    "dimensions": {
+      "waist": 112,
+      "hips": 112,
+      "glutes": 118,
+      "thighs": 108,
+      "calves": 113,
+      "ankles": 110
+    },
+    "dimensionsMm": {
+      "navelHeightMm": 924.8827653151005,
+      "navelSectionDepthMm": 178.87942610251272,
+      "hipBreadthMm": 369.71170497084535,
+      "hipDepthMm": 219.49028928518393,
+      "crotchHeightMm": 712.8397475462407,
+      "thighBreadthMm": 176.51340530301593,
+      "thighDepthMm": 195.7000081940673,
+      "thighCircumferenceMm": 584.9711869728287,
+      "kneeDepthMm": 115.81377717724486,
+      "calfDepthMm": 119.05878268317826,
+      "calfCircumferenceMm": 396.452026779946,
+      "footLengthMm": 233.80964249372482,
+      "footBreadthMm": 93.67912262678146,
+      "waistWidthMm": 277.7555286884308,
+      "buttBackMm": 144.81721818447113,
+      "ankleWidthMm": 73.13193380832672
+    },
+    "cuff": {
+      "samples": 7232,
+      "throughSkin": 0,
+      "minimumMm": 0.31004509775911515,
+      "maximumMm": 0.4754501985424625
+    },
+    "topology": {
+      "components": 1,
+      "openEdges": 0,
+      "nonManifoldEdges": 0,
+      "inconsistentEdges": 0
+    },
+    "foot": {
+      "samples": 16320,
+      "insideSkin": 0,
+      "minFieldMm": 0.13634364317375203,
+      "closestPointM": [
+        0.03514239316185316,
+        0.006766058504581451,
+        0.11754219233989716
+      ]
+    }
+  },
+  "small": {
+    "dimensions": {
+      "waist": 88,
+      "hips": 93,
+      "glutes": 83,
+      "thighs": 88,
+      "calves": 87,
+      "ankles": 90
+    },
+    "dimensionsMm": {
+      "navelHeightMm": 924.8827653151005,
+      "navelSectionDepthMm": 159.22464761338716,
+      "hipBreadthMm": 313.6969429961025,
+      "hipDepthMm": 194.4176802557447,
+      "crotchHeightMm": 709.4955628603554,
+      "thighBreadthMm": 143.9033457726632,
+      "thighDepthMm": 158.8229187829297,
+      "thighCircumferenceMm": 477.2093083060311,
+      "kneeDepthMm": 115.81332697699595,
+      "calfDepthMm": 91.82895050514337,
+      "calfCircumferenceMm": 305.78225008736126,
+      "footLengthMm": 233.80964249372482,
+      "footBreadthMm": 93.67912262678146,
+      "waistWidthMm": 218.2047814130783,
+      "buttBackMm": 119.68746781349182,
+      "ankleWidthMm": 60.53309887647629
+    },
+    "cuff": {
+      "samples": 7232,
+      "throughSkin": 0,
+      "minimumMm": 0.32907868332324175,
+      "maximumMm": 0.48994873922489357
+    },
+    "topology": {
+      "components": 1,
+      "openEdges": 0,
+      "nonManifoldEdges": 0,
+      "inconsistentEdges": 0
+    },
+    "foot": {
+      "samples": 16320,
+      "insideSkin": 0,
+      "minFieldMm": 0.13634364317375203,
+      "closestPointM": [
+        0.03514239316185316,
+        0.006766058504581451,
+        0.11754219233989716
+      ]
+    }
+  },
+  "mixed": {
+    "dimensions": {
+      "waist": 88,
+      "hips": 93,
+      "glutes": 118,
+      "thighs": 108,
+      "calves": 87,
+      "ankles": 110
+    },
+    "dimensionsMm": {
+      "navelHeightMm": 924.8827653151005,
+      "navelSectionDepthMm": 159.22328515827806,
+      "hipBreadthMm": 312.68420970938223,
+      "hipDepthMm": 219.31171786265952,
+      "crotchHeightMm": 711.9717627488455,
+      "thighBreadthMm": 176.5294228787142,
+      "thighDepthMm": 195.4735180472823,
+      "thighCircumferenceMm": 585.0536071338569,
+      "kneeDepthMm": 115.8140128703372,
+      "calfDepthMm": 91.8284921803369,
+      "calfCircumferenceMm": 305.780689472236,
+      "footLengthMm": 233.80964249372482,
+      "footBreadthMm": 93.67912262678146,
+      "waistWidthMm": 218.2047814130783,
+      "buttBackMm": 144.74324882030487,
+      "ankleWidthMm": 73.1632374227047
+    },
+    "cuff": {
+      "samples": 7232,
+      "throughSkin": 0,
+      "minimumMm": 0.3071045525121219,
+      "maximumMm": 0.4731111201447674
+    },
+    "topology": {
+      "components": 1,
+      "openEdges": 0,
+      "nonManifoldEdges": 0,
+      "inconsistentEdges": 0
+    },
+    "foot": {
+      "samples": 16320,
+      "insideSkin": 0,
+      "minFieldMm": 0.13634364317375203,
+      "closestPointM": [
+        0.03514239316185316,
+        0.006766058504581451,
+        0.11754219233989716
+      ]
+    }
+  },
+  "mobile": "passed"
+}

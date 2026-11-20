@@ -47,6 +47,7 @@
         <button type="button" data-view="thigh-macro" aria-pressed="false">極限マクロ</button>
         <button type="button" data-view="foot" aria-pressed="false">足部</button>
         <button type="button" id="bare-foot" aria-pressed="false">素足</button>
+        <button type="button" id="body-open">体型</button>
         <button type="button" id="settings-open">確かめる</button>
       </nav>
       <div class="subviews" id="subviews" aria-label="観察箇所" hidden></div>
@@ -70,6 +71,20 @@
       </select>
       <button type="button" id="benchmark">解像度別の布計算を測る</button>
       <p class="measurement" id="benchmark-result" aria-live="polite"></p>
+    </dialog>
+    <dialog id="body-settings" aria-labelledby="body-title">
+      <form method="dialog" class="sheet-heading">
+        <h2 id="body-title">体型を調整</h2><button type="submit">閉じる</button>
+      </form>
+      <form id="body-form">
+        <fieldset id="body-ranges" aria-label="基準体型に対する割合"></fieldset>
+        <div class="body-actions">
+          <button type="button" id="body-reset">基準に戻す</button>
+          <button type="submit" id="body-apply">着用に反映</button>
+        </div>
+        <p id="body-message" class="measurement" role="status"></p>
+      </form>
+      <button type="button" id="body-map" aria-pressed="false">軟組織マップ</button>
     </dialog>
   </main>
   <script type="module">

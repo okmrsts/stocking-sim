@@ -1,14 +1,16 @@
 import {
-  Color, DirectionalLight, Group, HemisphereLight, Mesh, MeshBasicNodeMaterial,
+  Color, DirectionalLight, Group, HemisphereLight, Mesh, MeshBasicMaterial, MeshBasicNodeMaterial,
   MeshStandardMaterial, PlaneGeometry, Scene
 } from 'three/webgpu';
 import { uv, wgslFn } from 'three/tsl';
+import { addTissueColors } from './tissue-colors.js';
 
-export function createStudio(config, body, clothGeometry, unloadedGeometry, clothMaterial) {
+export function createStudio(config, body, clothGeometry, unloadedGeometry, clothMaterial, tissueDisplay) {
   const scene = new Scene();
   scene.background = new Color(config.background);
 
   const skin = new MeshStandardMaterial({ color: config.skin, roughness: 0.74, metalness: 0.0 });
+  const map = new MeshBasicMaterial({ vertexColors: true, toneMapped: false });
   const torso = new Mesh(body.loaded, skin);
   scene.add(torso);
   const textile = new Group();
@@ -51,6 +53,11 @@ export function createStudio(config, body, clothGeometry, unloadedGeometry, clot
   return {
     scene, textile, unloaded,
     setSkinLoaded: loaded => { torso.geometry = loaded ? body.loaded : body.bare; },
+    setBody: next => { body = next; },
+    setTissueMap: enabled => {
+      if (enabled) addTissueColors(body.bare, body.tissueMap, tissueDisplay);
+      torso.material = enabled ? map : skin;
+    },
     setClothGeometry: geometry => {
       for (const stocking of textile.children) stocking.geometry = geometry;
     }
