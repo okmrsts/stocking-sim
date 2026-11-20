@@ -1,0 +1,61 @@
+{
+  "browser": "151.0.7922.34",
+  "viewport": {
+    "width": 1440,
+    "height": 1080
+  },
+  "mobile": {
+    "overflows": false,
+    "viewSwitchesPassed": true
+  },
+  "runtime": {
+    "errors": [],
+    "validationErrors": 0,
+    "revision": "185",
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader"
+    }
+  },
+  "full": {
+    "fps": 10.112757243262374,
+    "durationMs": 5933.1,
+    "medianMs": 100,
+    "p95Ms": 116.69999999999982,
+    "samples": 60,
+    "width": 1440,
+    "height": 1080
+  },
+  "macro": {
+    "fps": 3.6037334678727158,
+    "durationMs": 16649.4,
+    "medianMs": 250.09999999999854,
+    "p95Ms": 433.2999999999993,
+    "samples": 60,
+    "width": 1440,
+    "height": 1080
+  },
+  "comparison": {
+    "fps": 7.229176958203311,
+    "durationMs": 8299.699999999997,
+    "medianMs": 116.80000000000291,
+    "p95Ms": 200,
+    "samples": 60,
+    "width": 1440,
+    "height": 1080
+  },
+  "invalidFields": 0,
+  "preset": {
+    "tubeDiameterMm": 48,
+    "toeDiameterMm": 36.8,
+    "axialLengthMm": 797.2692251205444
+  },
+  "rest": {
+    "meridianLengthMm": 797.2691965916399,
+    "diameterMm": 48.00000041723251
+  },
+  "wornThigh": {
+    "hoop": 2.930142402648926,
+    "axial": 1.089863657951355
+  }
+}

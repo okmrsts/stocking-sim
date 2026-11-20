@@ -4,6 +4,7 @@ export function createStageCamera(views, resolveAnchor) {
   const camera = new PerspectiveCamera(35, 1, 0.01, 8);
   const target = new Vector3();
   const orbit = new Spherical();
+  let referenceDistance = 1;
 
   function setView(name) {
     const view = views[name];
@@ -16,6 +17,7 @@ export function createStageCamera(views, resolveAnchor) {
     camera.far = view.farM;
     camera.lookAt(target);
     camera.updateProjectionMatrix();
+    referenceDistance = camera.position.distanceTo(target);
   }
 
   function rotate(dx, dy) {
@@ -34,5 +36,5 @@ export function createStageCamera(views, resolveAnchor) {
     camera.lookAt(target);
   }
 
-  return { camera, setView, rotate, zoom };
+  return { camera, target, setView, rotate, zoom, zoomRatio: () => camera.position.distanceTo(target) / referenceDistance };
 }

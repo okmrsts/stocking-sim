@@ -26,6 +26,11 @@ canvas:active { cursor: grabbing; }
   color: var(--ink); padding: 7px 12px; border: 1px solid #c2b8aa; border-radius: 6px; font-size: .76rem;
 }
 .view-label { top: 14px; left: 14px; }
+.comparison-labels {
+  position: absolute; inset: 14px 0 auto; display: grid; grid-template-columns: 1fr 1fr;
+  justify-items: center; pointer-events: none; font-size: .78rem; color: var(--ink);
+}
+.comparison-labels span { background: #f9f5eeef; padding: 7px 10px; border: 1px solid #c2b8aa; border-radius: 6px; }
 #status { bottom: 12px; left: 14px; margin: 0; }
 #status[data-state="error"] { background: #fff0e6; }
 #details {

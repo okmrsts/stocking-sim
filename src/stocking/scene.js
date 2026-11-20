@@ -4,7 +4,7 @@ import {
 } from 'three/webgpu';
 import { uv, wgslFn } from 'three/tsl';
 
-export function createStudio(config, bodyParts, clothGeometry, clothMaterial) {
+export function createStudio(config, bodyParts, clothGeometry, unloadedGeometry, clothMaterial) {
   const scene = new Scene();
   scene.background = new Color(config.background);
 
@@ -14,6 +14,10 @@ export function createStudio(config, bodyParts, clothGeometry, clothMaterial) {
   const textile = new Mesh(clothGeometry, clothMaterial);
   textile.renderOrder = 2;
   scene.add(textile);
+  const unloaded = new Mesh(unloadedGeometry, clothMaterial);
+  unloaded.renderOrder = 2;
+  unloaded.visible = false;
+  scene.add(unloaded);
 
   const contact = new MeshBasicNodeMaterial({ transparent: true, depthWrite: false });
   contact.fragmentNode = wgslFn(`
@@ -35,5 +39,5 @@ export function createStudio(config, bodyParts, clothGeometry, clothMaterial) {
   const cool = new DirectionalLight(config.coolLight, 0.75);
   cool.position.set(1.5, 1.1, -0.9);
   scene.add(cool);
-  return { scene, textile };
+  return { scene, textile, unloaded };
 }

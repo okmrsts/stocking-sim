@@ -1,12 +1,12 @@
 # ストッキング・シミュレーター
 
-WebGPU 専用の布シミュレーターを段階ごとに作ります。段階1aでは固定版 three.js と自作 WGSL で、片脚の20D平編みニーハイの静止着用、折り返した布どうしの接触、足部の5本の指と踵を表示します。
+WebGPU 専用の布シミュレーターを段階ごとに作ります。段階1aでは固定版 three.js と自作 WGSL で、片脚の20D平編みニーハイの静止着用、折り返した布どうしの接触、足部の5本の指と踵を表示します。着用状態と無荷重の基準形状を同じ縮尺で比較できます。
 
 ## 開き方
 
 リポジトリのルートで `python3 -m http.server 8765` を実行し、WebGPU に対応したブラウザーで [localhost](http://localhost:8765/) を開きます。ビルドやパッケージのインストールは不要です。CDN に接続できる必要があります。
 
-[GitHub Pages のシミュレーター](https://okmrsts.github.io/stocking-sim/) を開けます。配信元は `main` の `/(root)` です。[段階0の診断](checks/0/probe.html) · [段階1aの足部とサイズの調整前後](checks/1a-close-fit/README.md)
+[GitHub Pages のシミュレーター](https://okmrsts.github.io/stocking-sim/) を開けます。配信元は `main` の `/(root)` です。[段階0の診断](checks/0/probe.html) · [段階1aの足部とサイズの調整前後](checks/1a-close-fit/README.md) · [着用比較](checks/1a-comparison/README.md)
 
 ## ファイル
 

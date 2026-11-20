@@ -27,6 +27,8 @@ export const meshLevels = Object.freeze([
 
 export const diagnostics = Object.freeze({ tensionNpmMax: 400, strainMax: 2.1, gapMmMax: 3.5, selfContactMmMax: 1.5 });
 
+export const comparisonConfig = Object.freeze({ heightM: 1.06, minHeightM: 0.86, minWidthM: 0.55, cameraDistanceM: 2 });
+
 export const renderConfig = Object.freeze({
   maxPixelRatio: 1.6, background: 0xe5dfd9, skin: 0xf1c7b2,
   warmLight: 0xffefda, coolLight: 0xf5f0ff

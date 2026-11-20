@@ -6,10 +6,14 @@ import { createGpuContext, withGpuValidation } from './core/gpu/context.js';
 import { createTextileMaterial } from './core/textile/material.js';
 import { measureFrames, summarize } from './core/ui/metrics.js';
 import { connectOrbit } from './core/ui/pointer-router.js';
-import { bodyProfile, footAnatomy, diagnostics, material, meshLevels, preset, renderConfig } from './config/stage1a.js';
+import {
+  bodyProfile, comparisonConfig, footAnatomy, diagnostics, material, meshLevels, preset, renderConfig
+} from './config/stage1a.js';
 import { createKneeHighInput } from './stocking/rest-shape.js';
+import { createUnloadedGeometry } from './stocking/unloaded-preview.js';
 import { createStudio } from './stocking/scene.js';
 import { createStageCamera } from './stocking/stage-camera.js';
+import { createComparisonView } from './stocking/comparison-view.js';
 import { collectFitMetrics } from './stocking/stage1a-metrics.js';
 import { measureFootFit } from './stocking/foot-fit-metrics.js';
 
@@ -35,6 +39,7 @@ export async function start() {
   const scale = document.getElementById('scale');
   const subviews = document.getElementById('subviews');
   const viewLabel = document.getElementById('view-label');
+  const comparisonLabels = document.getElementById('comparison-labels');
   const controls = Array.from(document.querySelectorAll('.toolbar [data-view]'));
   const viewMode = document.getElementById('display-mode');
   if (query.has('capture')) document.documentElement.classList.add('capture');
@@ -80,16 +85,18 @@ export async function start() {
   };
   const cloth = createTextileMaterial(optics, diagnostics);
   const geometry = createClothGeometry(frame);
+  const unloadedGeometry = createUnloadedGeometry(frame);
   const bodyParts = surface.skinParts();
-  const { scene, textile } = createStudio(renderConfig, bodyParts, geometry, cloth.material);
-  const { camera, setView: positionCamera, rotate, zoom } = createStageCamera(views, anchor => {
+  const { scene, textile, unloaded } = createStudio(renderConfig, bodyParts, geometry, unloadedGeometry, cloth.material);
+  const { camera, target, setView: positionCamera, rotate, zoom, zoomRatio } = createStageCamera(views, anchor => {
     const sample = sampleCloth(frame, surface, anchor.arcM, anchor.angleRad);
     return {
       positionM: sample.position.map((coordinate, axis) => coordinate + sample.normal[axis] * anchor.distanceM),
       targetM: sample.position
     };
   });
-  const draw = () => renderer.render(scene, camera);
+  const comparison = createComparisonView(unloaded, comparisonConfig);
+  const draw = () => renderer.render(scene, unloaded.visible ? comparison.synchronize(camera, target, zoomRatio()) : camera);
   let currentView = defaultView;
   let resizeQueued = false;
   let drawQueued = false;
@@ -123,6 +130,11 @@ export async function start() {
     currentView = viewId;
     userMovedCamera = false;
     positionCamera(viewId);
+    const comparing = viewId === 'comparison';
+    unloaded.visible = comparing;
+    comparisonLabels.hidden = !comparing;
+    viewLabel.hidden = comparing;
+    if (comparing && !textile.visible) setBarefoot(false);
     const current = views[viewId];
     const label = current.group === 'macro' ? '極限マクロ · ' : current.group === 'wrinkles' ? 'シワ · ' : '';
     viewLabel.textContent = label + current.label;
@@ -161,6 +173,7 @@ export async function start() {
 
   const barefootButton = document.getElementById('bare-foot');
   function setBarefoot(barefoot) {
+    if (barefoot && unloaded.visible) setView('front');
     textile.visible = !barefoot;
     barefootButton.setAttribute('aria-pressed', String(barefoot));
     viewMode.disabled = barefoot || measuring;
@@ -300,7 +313,7 @@ export async function start() {
 
   if (query.has('capture')) {
     window.stockingStage1a = {
-      result, setView, setDisplay, setBarefoot, profileView, meshBenchmarks,
+      result, setView, setDisplay, setBarefoot, profileView, meshBenchmarks, unloadedGeometry,
       ...collectFitMetrics(frame, surface, optics, cloth.radiusM),
       footFit: measureFootFit(geometry, bodyParts[1], surface.footDistance, surface.footLimitM),
       initial: { points: frame.points, triangles: frame.triangles, prepareMs: initial.prepareMs, ...summarize(frame.elapsedMs) }
