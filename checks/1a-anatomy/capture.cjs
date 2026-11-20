@@ -100,22 +100,26 @@ function measureSurface() {
   };
 }
 
-async function capture() {
+async function capture({
+  output = __dirname,
+  bareViews = [['front','bare-front'], ['side','bare-side'], ['back','bare-back'], ['oblique','bare-oblique']],
+  wornViews = [
+    ['front','01-front'], ['oblique','02-oblique'], ['ankle-wrinkles','03a-ankle'], ['knee-wrinkles','03b-knee'],
+    ['thigh','04-thigh'], ['thigh-macro','05a-thigh-macro'], ['ankle-macro','05b-ankle-macro'],
+    ['comparison','06-comparison'], ['cuff','07-cuff'], ['foot','08-foot'], ['heel','09-heel']
+  ],
+  inspect = null
+} = {}) {
   await withBrowser(process.argv[2], process.argv[3], async ({ browser, base, newPage }) => {
     const page = await newPage({ viewport: { width: 1440, height: 1080 } });
     await ready(page, base + '?capture=1');
     const measured = await page.evaluate(measureSurface);
-    const bareViews = [['front','bare-front'], ['side','bare-side'], ['back','bare-back'], ['oblique','bare-oblique']];
-    const wornViews = [
-      ['front','01-front'], ['oblique','02-oblique'], ['ankle-wrinkles','03a-ankle'], ['knee-wrinkles','03b-knee'],
-      ['thigh','04-thigh'], ['thigh-macro','05a-thigh-macro'], ['ankle-macro','05b-ankle-macro'],
-      ['comparison','06-comparison'], ['cuff','07-cuff'], ['foot','08-foot'], ['heel','09-heel']
-    ];
+    const inspection = await inspect?.(page) ?? {};
     for (const [bare, views] of [[true, bareViews], [false, wornViews]]) {
       await page.evaluate(bare => window.stockingStage1a.setBarefoot(bare), bare);
       for (const [view, name] of views) {
         await page.evaluate(view => window.stockingStage1a.profileView(view, 2), view);
-        await page.screenshot({ path: join(__dirname, name + '.png') });
+        await page.screenshot({ path: join(output, name + '.png') });
       }
     }
     const speed = await page.evaluate(async () => {
@@ -136,9 +140,9 @@ async function capture() {
     assert.equal(await mobile.getByRole('button', { name:'素足', exact:true }).getAttribute('aria-pressed'), 'true');
     assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await mobile.getByRole('button', { name:'着用比較', exact:true }).click();
-    await mobile.screenshot({ path: join(__dirname, 'mobile.png') });
-    const result = { browser: browser.version(), ...measured, ...speed };
-    await writeFile(join(__dirname,'result.json'), JSON.stringify(result, null, 2) + '\n');
+    await mobile.screenshot({ path: join(output, 'mobile.png') });
+    const result = { browser: browser.version(), ...measured, ...inspection, ...speed };
+    await writeFile(join(output,'result.json'), JSON.stringify(result, null, 2) + '\n');
 
     assert.deepEqual(measured.topology, { components: 1, openEdges: 0, nonManifoldEdges: 0, inconsistentEdges: 0 });
     assert.ok(measured.positionsFinite);
@@ -161,5 +165,5 @@ async function capture() {
   });
 }
 
-module.exports = { measureSurface };
+module.exports = { capture, measureSurface, ready };
 if (require.main === module) capture().catch(error => { console.error(error); process.exitCode = 1; });

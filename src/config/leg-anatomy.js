@@ -100,5 +100,19 @@ export const lowerBodyConfig = Object.freeze({
     [0.933, 0.124, 0.070, -0.0986, 2.00]
   ],
   navel: { yM: 0.9269, depthM: 0.0041, widthM: 0.008, heightM: 0.0062 },
-  glutealCleft: { yM: 0.778, depthM: 0.006, widthM: 0.014, heightM: 0.057 }
+  gluteal: {
+    lobeCenterM: [0.072, 0.783, -0.059],
+    lobeRadiiM: [0.081, 0.114, 0.071],
+    sagittalSlope: -0.11,
+    blendM: 0.033,
+    midlineBlendM: 0.009,
+    lowerTorsoInsetM: 0.026,
+    torsoTransitionYM: [0.735, 0.854],
+    torsoTransitionDepthM: [0.020, 0.100],
+    lobeFrontZM: -0.030,
+    lobeFrontBlendM: 0.020,
+    cleft: { yM: 0.783, depthM: 0.004, widthM: 0.011, heightM: 0.054 },
+    fold: { yM: 0.6941, depthM: 0.0025, widthM: 0.0085, risePerM: 0.15,
+      centerXM: 0.042, insideXM: [0.010, 0.032], outsideXM: [0.052, 0.126], posteriorDepthM: [0.060, 0.094] }
+  }
 });

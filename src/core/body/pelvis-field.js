@@ -1,4 +1,5 @@
 import { interpolate } from './swept-surface.js';
+import { foldInset, includeGlutealVolume, posteriorInset } from './gluteal-field.js';
 
 const tau = 2 * Math.PI;
 const mix = (a, b, t) => a + (b - a) * t;
@@ -11,7 +12,7 @@ function smoothMinimum(a, b, radius) {
 }
 
 export function createPelvisField(surface, config) {
-  const { pelvisSections, halfStanceM, joinArc, crotchY, crotchZ, thighRootY, pelvisBlendM, navel, glutealCleft } = config;
+  const { pelvisSections, halfStanceM, joinArc, crotchY, crotchZ, thighRootY, pelvisBlendM, navel, gluteal } = config;
   const startY = surface.section(joinArc).y;
   const topY = pelvisSections.at(-1)[0];
   const rows = Math.ceil((topY - startY) / 0.002);
@@ -43,6 +44,7 @@ export function createPelvisField(surface, config) {
   }
 
   function sample(x, y, z) {
+    z -= foldInset(x, y, z, gluteal);
     const row = clamp((y - startY) / step, 0, rows);
     const i = Math.min(rows - 1, Math.floor(row)), t = row - i;
     const absoluteX = Math.abs(x);
@@ -55,17 +57,17 @@ export function createPelvisField(surface, config) {
     const centerZ = (front + back) / 2;
     const depth = (front - back) / 2;
     const zComponent = (z - centerZ) / depth;
-    const frontDetail = zComponent > 0 ? navel : glutealCleft;
+    const frontDetail = zComponent > 0 ? navel : gluteal.cleft;
     const indentation = frontDetail.depthM * gaussian(x, frontDetail.widthM)
       * gaussian(y - frontDetail.yM, frontDetail.heightM) * Math.min(1, Math.abs(zComponent) ** 4);
     const torso = (Math.pow(Math.pow(absoluteX / halfWidth, exponent) + Math.pow(Math.abs(zComponent), exponent), 1 / exponent) - 1)
-      * depth + indentation;
+      * depth + indentation + posteriorInset(y, z, gluteal);
     const span = z >= crotchZ ? front - crotchZ : crotchZ - back;
     const endLift = z >= crotchZ ? 0.030 : 0.043;
     const undersideY = crotchY + endLift * Math.pow(clamp(Math.abs(z - crotchZ) / span, 0, 1.3), 1.55)
       + 0.018 * (absoluteX / halfWidth) ** 2;
     const pelvis = -smoothMinimum(-torso, y - undersideY, 0.035);
-    if (y > thighRootY + pelvisBlendM) return pelvis;
+    if (y > thighRootY + pelvisBlendM) return includeGlutealVolume(pelvis, x, y, z, gluteal);
 
     const thighX = mix(centers[i][0], centers[i + 1][0], t);
     const thighZ = mix(centers[i][1], centers[i + 1][1], t);
@@ -81,7 +83,7 @@ export function createPelvisField(surface, config) {
     // Limit the medial blend to the region where the inner thighs approach the pelvis.
     const unionRadius = 0.003 + 0.014 * clamp((y - (crotchY - 0.028)) / 0.042, 0, 1);
     const legs = absoluteX < 0.035 ? smoothMinimum(right, thigh(-absoluteX - thighX), unionRadius) : right;
-    return smoothMinimum(legs, pelvis, pelvisBlendM);
+    return includeGlutealVolume(smoothMinimum(legs, pelvis, pelvisBlendM), x, y, z, gluteal);
   }
 
   return { sample, startY, topY };

@@ -209,6 +209,40 @@
       "fovDeg": 35,
       "nearM": 0.02,
       "farM": 8
+    },
+    "hip-rear": {
+      "label": "臀部",
+      "group": "angles",
+      "positionM": [
+        0.66,
+        0.82,
+        -0.86
+      ],
+      "targetM": [
+        0,
+        0.765,
+        -0.034
+      ],
+      "fovDeg": 25,
+      "nearM": 0.01,
+      "farM": 4
+    },
+    "hip-side": {
+      "label": "臀部側面",
+      "group": "angles",
+      "positionM": [
+        1.06,
+        0.801,
+        -0.027
+      ],
+      "targetM": [
+        0,
+        0.766,
+        -0.027
+      ],
+      "fovDeg": 23,
+      "nearM": 0.01,
+      "farM": 4
     }
   }
 }
