@@ -82,6 +82,7 @@ async function run() {
     output: __dirname,
     bareViews,
     wornViews,
+    mobileAngles: [['臀部側面'], ['臀部', 'mobile-hip-rear']],
     inspect: async page => {
       const posterior = await page.evaluate(measurePosterior);
       assert.ok(posterior.every(slice => Number.isFinite(slice.maxTurnDegrees)));

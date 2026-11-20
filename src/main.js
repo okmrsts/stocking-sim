@@ -104,7 +104,7 @@ export async function start() {
   const { scene, textile, unloaded, setSkinLoaded, setClothGeometry } = createStudio(
     renderConfig, body, geometry, unloadedGeometry, cloth.material
   );
-  const { camera, target, setView: positionCamera, rotate, zoom, zoomRatio } = createStageCamera(views, anchor => {
+  const { camera, target, setView: positionCamera, setAspect, rotate, zoom, zoomRatio } = createStageCamera(views, anchor => {
     const sample = sampleCloth(frame, surface, anchor.arcM, anchor.angleRad);
     return {
       positionM: sample.position.map((coordinate, axis) =>
@@ -207,8 +207,7 @@ export async function start() {
     if (!width || !height) return;
     renderer.setPixelRatio(query.has('capture') ? 1 : Math.min(devicePixelRatio, renderConfig.maxPixelRatio));
     renderer.setSize(width, height, false);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+    setAspect(width / height);
     updateScale();
     requestDraw();
   }

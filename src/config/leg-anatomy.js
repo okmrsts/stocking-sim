@@ -105,6 +105,7 @@ export const lowerBodyConfig = Object.freeze({
     lobeRadiiM: [0.081, 0.114, 0.071],
     sagittalSlope: -0.11,
     blendM: 0.033,
+    lowerBlendYM: [0.680, 0.718],
     midlineBlendM: 0.009,
     lowerTorsoInsetM: 0.026,
     torsoTransitionYM: [0.735, 0.854],
@@ -113,6 +114,7 @@ export const lowerBodyConfig = Object.freeze({
     lobeFrontBlendM: 0.020,
     cleft: { yM: 0.783, depthM: 0.004, widthM: 0.011, heightM: 0.054 },
     fold: { yM: 0.6941, depthM: 0.0025, widthM: 0.0085, risePerM: 0.15,
-      centerXM: 0.042, insideXM: [0.010, 0.032], outsideXM: [0.052, 0.126], posteriorDepthM: [0.060, 0.094] }
+      centerXM: 0.042, insideXM: [0.010, 0.032], outsideXM: [0.052, 0.126],
+      lowerBlendYM: [0.680, 0.691], posteriorDepthM: [0.060, 0.094] }
   }
 });

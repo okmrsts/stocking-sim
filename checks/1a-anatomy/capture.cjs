@@ -108,6 +108,7 @@ async function capture({
     ['thigh','04-thigh'], ['thigh-macro','05a-thigh-macro'], ['ankle-macro','05b-ankle-macro'],
     ['comparison','06-comparison'], ['cuff','07-cuff'], ['foot','08-foot'], ['heel','09-heel']
   ],
+  mobileAngles = [],
   inspect = null
 } = {}) {
   await withBrowser(process.argv[2], process.argv[3], async ({ browser, base, newPage }) => {
@@ -138,6 +139,12 @@ async function capture({
     await mobile.getByRole('button', { name:'背面', exact:true }).click();
     await mobile.getByRole('button', { name:'素足', exact:true }).click();
     assert.equal(await mobile.getByRole('button', { name:'素足', exact:true }).getAttribute('aria-pressed'), 'true');
+    for (const [label, name] of mobileAngles) {
+      const angle = mobile.getByRole('button', { name: label, exact: true });
+      await angle.click();
+      assert.equal(await angle.getAttribute('aria-pressed'), 'true');
+      if (name) await mobile.screenshot({ path: join(output, name + '.png') });
+    }
     assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await mobile.getByRole('button', { name:'着用比較', exact:true }).click();
     await mobile.screenshot({ path: join(output, 'mobile.png') });

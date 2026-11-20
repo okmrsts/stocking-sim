@@ -224,6 +224,7 @@
         -0.034
       ],
       "fovDeg": 25,
+      "minHorizontalFovDeg": 24,
       "nearM": 0.01,
       "farM": 4
     },
@@ -241,6 +242,7 @@
         -0.027
       ],
       "fovDeg": 23,
+      "minHorizontalFovDeg": 23,
       "nearM": 0.01,
       "farM": 4
     }

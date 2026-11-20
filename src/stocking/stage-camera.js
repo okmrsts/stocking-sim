@@ -1,22 +1,32 @@
-import { PerspectiveCamera, Spherical, Vector3 } from 'three/webgpu';
+import { MathUtils, PerspectiveCamera, Spherical, Vector3 } from 'three/webgpu';
 
 export function createStageCamera(views, resolveAnchor) {
   const camera = new PerspectiveCamera(35, 1, 0.01, 8);
   const target = new Vector3();
   const orbit = new Spherical();
   let referenceDistance = 1;
+  let view;
+
+  function setAspect(aspect) {
+    camera.aspect = aspect;
+    if (view) {
+      const halfHorizontal = MathUtils.degToRad((view.minHorizontalFovDeg ?? 0) / 2);
+      const vertical = 2 * MathUtils.radToDeg(Math.atan(Math.tan(halfHorizontal) / aspect));
+      camera.fov = Math.max(view.fovDeg, vertical);
+    }
+    camera.updateProjectionMatrix();
+  }
 
   function setView(name) {
-    const view = views[name];
-    if (!view) throw new Error('視点が見つかりません。');
+    if (!views[name]) throw new Error('視点が見つかりません。');
+    view = views[name];
     const { positionM, targetM } = view.anchor ? resolveAnchor(view.anchor) : view;
     camera.position.fromArray(positionM);
     target.fromArray(targetM);
-    camera.fov = view.fovDeg;
     camera.near = view.nearM;
     camera.far = view.farM;
     camera.lookAt(target);
-    camera.updateProjectionMatrix();
+    setAspect(camera.aspect);
     referenceDistance = camera.position.distanceTo(target);
   }
 
@@ -36,5 +46,5 @@ export function createStageCamera(views, resolveAnchor) {
     camera.lookAt(target);
   }
 
-  return { camera, target, setView, rotate, zoom, zoomRatio: () => camera.position.distanceTo(target) / referenceDistance };
+  return { camera, target, setView, setAspect, rotate, zoom, zoomRatio: () => camera.position.distanceTo(target) / referenceDistance };
 }
